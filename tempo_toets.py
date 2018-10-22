@@ -189,11 +189,11 @@ def main_menu(try_agains = {}, **kwargs):
         try_agains = do_the_tempo_toets()
         input("Press [ENTER] to continue...")
         if try_agains and len(try_agains) > 0:
-            main_menu(try_agains = try_agains)
+            main_menu(try_agains)
         else:
             main_menu()
     elif user_action == "4":
-        try_agains = ask_question(kwargs['try_agains'])
+        try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
         print(len(try_agains))
         if try_agains and len(try_agains) > 0:
