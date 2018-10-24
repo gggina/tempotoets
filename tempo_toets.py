@@ -35,9 +35,9 @@ def print_question_list(question_list):
             print("  <<  ...you answered", question_list[q][-1])
 
 def answer_question(question_list, q):
-    global try_agains
     print("question", q+1, "> ", end="")
     answer = input(question_list[q][0])
+    global try_agains
     try:
         answer = int(answer)
         if answer == 0:
@@ -49,8 +49,9 @@ def answer_question(question_list, q):
         else:
 #            print("not quite...")
             result = "incorrect"
-            try_agains[q]= question_list[q]
-            try_agains[q].append(answer)
+            this_error = len(try_agains)
+            try_agains[this_error]= question_list[q]
+            try_agains[this_error].append(answer)
             return result
     except ValueError:
         print("you're wasting time - enter a number higher than 0")
@@ -58,7 +59,7 @@ def answer_question(question_list, q):
 
 def ask_question(question_list):
     os.system('cls||clear')
-    global lists_this_session
+    global try_agains
     print("<><><><><><><><><><><><><><>")
     print("<>      TEMPO TOETS       <>")
     print("<><><><><><><><><><><><><><>\n")
@@ -66,12 +67,9 @@ def ask_question(question_list):
     start = time.time()
     correct = 0
     incorrect = 0
-    global try_agains
     try_agains={}
-#    print(question_list)
-    for q in range(len(question_list)):
+    for q in question_list:
         result = answer_question(question_list, q)
-#        print(try_agains)
         if result == "correct":
             correct +=1
         elif result == "incorrect":
@@ -141,41 +139,39 @@ def do_the_tempo_toets():
 
 
 def main_menu(try_agains = {}, **kwargs):
-    print(len(kwargs))
     if 'question_list' in kwargs:
-        question_list=kwargs['question_list']
-    if 'try_agains' in kwargs:
-        try_agains = kwargs['try_agains']
+        question_list = kwargs['question_list']
     os.system('cls||clear')
     print("<><><><><><><><><><><><><><>")
     print("<>      TEMPO TOETS       <>")
     print("<><><><><><><><><><><><><><>")
+    print("\n")
+    print("TEST MODE...")
+    print("[1] - Do the TEMPO TOETS!!!")
     print("\n\n")
-    print("1 - Practice with a new question list")
-    print("\n\n")
+    print("PRACTICE MODE...")
+    print("[2] - New question list")
     if "question_list" in kwargs:
-        print("2 - Practice again with same question list")
-        print("\n\n")
-    print("3 - DO THE TEMPO TOETS!!!")
+        print("[3] - Same questions again (random order)")
     if len(try_agains) >0:
-            print("4 - Practice the questions you got wrong last time")
-    print("\n\n")
-    print("9 - view high scores")
-    print("\n\n")
-    print("q - quit this game")
-    print("\n\n")
+            print("[4] - Just the questions you got wrong last time")
+    print("\n")
+    print("----------------")
+    print("[9] - high scores")
+    print("[q] - quit this game")
+    print("\n")
     user_action = input("What do you want to do?")
-    if user_action == "1":
+    if user_action == "2":
         top_table = int(input("What's the top table you want to practice?"))
         number_of_questions = int(input("how many questions do you want?"))
         question_list = generate_questions(number_of_questions,top_table)
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
         if try_agains:
-            main_menu(question_list=question_list, try_agains=try_agains)
+            main_menu(try_agains, question_list=question_list)
         else:
-            main_menu(question_list=question_list)
-    elif user_action == "2":
+            main_menu(question_list)
+    elif user_action == "3":
         num_list = list(range(len(kwargs['question_list'])))
         random.shuffle(num_list)
         new_question_list = {}
@@ -184,20 +180,20 @@ def main_menu(try_agains = {}, **kwargs):
             new_question_list[i] = question_list[new_question]
         try_agains = ask_question(new_question_list)
         input("Press [ENTER] to continue...")
-        main_menu(question_list=question_list, try_agains=try_agains)
-    elif user_action == "3":
-        try_agains = do_the_tempo_toets()
-        input("Press [ENTER] to continue...")
-        if try_agains and len(try_agains) > 0:
-            main_menu(try_agains)
-        else:
-            main_menu()
+        main_menu(try_agains, question_list=question_list)
     elif user_action == "4":
         try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
         print(len(try_agains))
         if try_agains and len(try_agains) > 0:
-            main_menu(try_agains = try_agains)
+            main_menu(try_agains)
+        else:
+            main_menu()
+    elif user_action == "1":
+        try_agains = do_the_tempo_toets()
+        input("Press [ENTER] to continue...")
+        if try_agains and len(try_agains) > 0:
+            main_menu(try_agains)
         else:
             main_menu()
     elif user_action == "9":
