@@ -2,6 +2,7 @@ from functools import wraps
 import time
 import random
 import os
+import datetime
 
 try_agains = {}
 current_top_time = 0
@@ -44,21 +45,20 @@ def answer_question(question_list, q):
     try:
         answer = int(answer)
         if answer == 0:
-            print("you're wasting time - enter a number higher than 0")
-            answer_question(question_list,q)
+            result = "invalid"
+            return result
         elif answer == question_list[q][1]:
             result = "correct"
             return result
         else:
-#            print("not quite...")
             result = "incorrect"
             this_error = len(try_agains)
             try_agains[this_error]= question_list[q]
             try_agains[this_error].append(answer)
             return result
     except ValueError:
-        print("you're wasting time - enter a number higher than 0")
-        answer_question(question_list,q)
+        result = "invalid"
+        return result
 
 def ask_question(question_list):
     os.system('cls||clear')
@@ -78,6 +78,9 @@ def ask_question(question_list):
             correct +=1
         elif result == "incorrect":
             incorrect +=1
+        elif result == "invalid":
+            print("you're wasting time - enter a number higher than 0")
+            answer_question(question_list,q)
         else:
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains, question_list)
@@ -108,13 +111,12 @@ def do_the_tempo_toets():
     incorrect = 0
     global try_agains
     question_list = generate_questions(1000,10)
-    print("<><><><><><><><><><><><><><>")
-    print("<>      TEMPO TOETS       <>")
-    print("<><><><><><><><><><><><><><>")
-    print("\n\n")
-    print("This is it - you get 1 minute...\nSee how many questions you can answer!")
-    print("\n\n")
-    input("hit [ENTER] to start")
+    header()
+    player = input("Who's playing?")
+    os.system('cls||clear')
+    header()
+    print("This is it", player, "- you get 1 minute...\nSee how many questions you can answer!\n")
+    input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
 #    print(question_list)
@@ -124,40 +126,68 @@ def do_the_tempo_toets():
             correct +=1
         elif result == "incorrect":
             incorrect +=1
-        total_time = time.time()-start
+        elif result == "invalid":
+            print("you're wasting time - enter a number higher than 0")
+            answer_question(question_list,q)
+        else:
+            input("hit [ENTER] to go back to the main menu")
+            main_menu(try_agains, question_list)
+        total_time = round((time.time()-start),2)
         if total_time > 60:
             break
     print("STOP!!")
     print("time's up.")
     print("...............")
-    print("You answered >>", (correct + incorrect), "<< questions in", round(total_time,2), "seconds")
+    print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
     print("\n\n")
+    if correct > incorrect:
+        high_score_check(correct)
     input("hit [ENTER] to see your results")
-    print("GOOD ANSWERS:", correct)
+    print("\nCORRECT answers:", correct)
     print("INCORRECT answers: ", incorrect)
     if incorrect > 0:
         print("-- -- -- -- -- --")
         print_question_list(try_agains)
         print("-- -- -- -- -- --")
         return try_agains
+    else:
+        print("\n-- -- -- -- -- --")
+        print("ALL CORRECT!!!")
+        print("-- -- -- -- -- --\n")
 
+def high_score_check(total_correct):
+    # todo
+    pass
 
+def read_high_score():
+    # todo
+    pass
+
+def header():
+    right_now = datetime.datetime.today()
+    pretty_datetime = right_now.ctime()
+    print("> ---------------------------- <")
+    print(">         TEMPO TOETS          <")
+    print(">                              <")
+    print(">  ", pretty_datetime, "  <")
+    print("> ---------------------------- <")
+    print("\n")
 
 def main_menu(try_agains = {}, question_list = {}):
     os.system('cls||clear')
-    print("<><><><><><><><><><><><><><>")
-    print("<>      TEMPO TOETS       <>")
-    print("<><><><><><><><><><><><><><>")
-    print("\n")
-    print("TEST MODE...")
+    qlist = False
+    trylist = False
+    header()
+    print("TOETS MODE...")
     print("[1] - Do the TEMPO TOETS!!!")
     print("\n\n")
     print("PRACTICE MODE...")
     print("[2] - New question list")
     if len(question_list) > 0:
+        qlist = True
         print("[3] - Same questions again (random order)")
     if len(try_agains) >0:
-        print(len(try_agains))
+        trylist = True
         print("[4] - Just the questions you got wrong last time")
     print("\n")
     print("----------------")
@@ -172,7 +202,7 @@ def main_menu(try_agains = {}, question_list = {}):
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
         main_menu(try_agains, question_list)
-    elif user_action == "3":
+    elif user_action == "3" and qlist == True:
         num_list = list(range(len(question_list)))
         random.shuffle(num_list)
         new_question_list = {}
@@ -182,7 +212,7 @@ def main_menu(try_agains = {}, question_list = {}):
         try_agains = ask_question(new_question_list)
         input("Press [ENTER] to continue...")
         main_menu(try_agains, question_list)
-    elif user_action == "4":
+    elif user_action == "4" and trylist == True:
         try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
         print(len(try_agains))
@@ -204,6 +234,8 @@ def main_menu(try_agains = {}, question_list = {}):
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
+    else:
+        main_menu(try_agains, question_list)
 
 
 main_menu()
