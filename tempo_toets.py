@@ -15,28 +15,31 @@ def generate_questions(total_questions, up_to_table):
     global total_lists_this_session
     for q in range(0, total_questions):
         a = random.randint(2, (up_to_table))
-        b = random.randint(2, (up_to_table))
+        b = random.randint(2, 12)
         c = a*b
-        multi_or_divi = random.randint(1,5)
+        multi_or_divi = random.randint(1,6)
         if multi_or_divi ==2:
-            question_list[q] = [(str(c) + ":" + str(b) + "="), a]
-        elif multi_or_divi == 3:
-            question_list[q] = [(str(c) + ":" + str(a) + "="), b]
+            question_list[q] = [(str(b) + "x" + str(a) + "= "), c]
+        elif multi_or_divi == 2 or multi_or_divi == 3:
+            question_list[q] = [(str(c) + ":" + str(a) + "= "), b]
         else:
-            question_list[q] = [(str(a) + "x" + str(b) + "="), c]
+            question_list[q] = [(str(a) + "x" + str(b) + "= "), c]
     total_lists_this_session +=1
     lists_this_session[total_lists_this_session]= question_list
     return question_list
 
 def print_question_list(question_list):
     for q in question_list:
-        print("question", q+1, " >> ", question_list[q][0], question_list[q][1], end="")
+        print("question", q+1, " >> ", str(question_list[q][0]) + str(question_list[q][1]), end="")
         if len(question_list[q]) >= 2:
             print("  <<  ...you answered", question_list[q][-1])
 
 def answer_question(question_list, q):
     print("question", q+1, "> ", end="")
     answer = input(question_list[q][0])
+    if answer == "m":
+        result = "menu"
+        return result
     global try_agains
     try:
         answer = int(answer)
@@ -63,6 +66,7 @@ def ask_question(question_list):
     print("<><><><><><><><><><><><><><>")
     print("<>      TEMPO TOETS       <>")
     print("<><><><><><><><><><><><><><>\n")
+    print("[m] - Back to the main menu\n")
     print("STARTING THE TIMER...\n")
     start = time.time()
     correct = 0
@@ -74,25 +78,28 @@ def ask_question(question_list):
             correct +=1
         elif result == "incorrect":
             incorrect +=1
+        else:
+            input("hit [ENTER] to go back to the main menu")
+            main_menu(try_agains, question_list)
     print("\nSTOPPING THE TIMER...")
     end = time.time()
     total_time = round((end-start),2)
     print("Total time spent:", total_time, "seconds")
-    print("incorrect total:", incorrect)
+    print("\n")
+    input("Hit [ENTER] to see your results")
     if incorrect == 0:
-        print("-- -- -- -- -- --")
+        print("\n-- -- -- -- -- --")
         print("ALL CORRECT!!!")
-        print("-- -- -- -- -- --")
+        print("-- -- -- -- -- --\n")
     elif correct == 0:
-        print("-- -- -- -- -- --")
-        print("you got every single answer wrong...")
+        print("\n-- -- -- -- -- --")
+        print("0 correct answers...\n")
         print_question_list(try_agains)
-        print("-- -- -- -- -- --")
+        print("-- -- -- -- -- --\n")
     else:
-        print("-- -- -- -- -- --")
-        print("you got ", incorrect, " answer(s) wrong:")
+        print("\n-- -- -- -- -- --")
         print_question_list(try_agains)
-        print("-- -- -- -- -- --")
+        print("-- -- -- -- -- --\n")
     return try_agains
 
 def do_the_tempo_toets():
@@ -150,7 +157,8 @@ def main_menu(try_agains = {}, question_list = {}):
     if len(question_list) > 0:
         print("[3] - Same questions again (random order)")
     if len(try_agains) >0:
-            print("[4] - Just the questions you got wrong last time")
+        print(len(try_agains))
+        print("[4] - Just the questions you got wrong last time")
     print("\n")
     print("----------------")
     print("[9] - high scores")
@@ -163,10 +171,7 @@ def main_menu(try_agains = {}, question_list = {}):
         question_list = generate_questions(number_of_questions,top_table)
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
-        if try_agains:
-            main_menu(try_agains, question_list)
-        else:
-            main_menu(question_list)
+        main_menu(try_agains, question_list)
     elif user_action == "3":
         num_list = list(range(len(question_list)))
         random.shuffle(num_list)
