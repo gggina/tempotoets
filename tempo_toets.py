@@ -132,15 +132,11 @@ def do_the_tempo_toets():
         print("-- -- -- -- -- --")
         print_question_list(try_agains)
         print("-- -- -- -- -- --")
-        print(type(try_agains))
-        print(try_agains)
         return try_agains
 
 
 
-def main_menu(try_agains = {}, **kwargs):
-    if 'question_list' in kwargs:
-        question_list = kwargs['question_list']
+def main_menu(try_agains = {}, question_list = {}):
     os.system('cls||clear')
     print("<><><><><><><><><><><><><><>")
     print("<>      TEMPO TOETS       <>")
@@ -151,7 +147,7 @@ def main_menu(try_agains = {}, **kwargs):
     print("\n\n")
     print("PRACTICE MODE...")
     print("[2] - New question list")
-    if "question_list" in kwargs:
+    if len(question_list) > 0:
         print("[3] - Same questions again (random order)")
     if len(try_agains) >0:
             print("[4] - Just the questions you got wrong last time")
@@ -168,11 +164,11 @@ def main_menu(try_agains = {}, **kwargs):
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
         if try_agains:
-            main_menu(try_agains, question_list=question_list)
+            main_menu(try_agains, question_list)
         else:
             main_menu(question_list)
     elif user_action == "3":
-        num_list = list(range(len(kwargs['question_list'])))
+        num_list = list(range(len(question_list)))
         random.shuffle(num_list)
         new_question_list = {}
         for i in range(len(num_list)):
@@ -180,7 +176,7 @@ def main_menu(try_agains = {}, **kwargs):
             new_question_list[i] = question_list[new_question]
         try_agains = ask_question(new_question_list)
         input("Press [ENTER] to continue...")
-        main_menu(try_agains, question_list=question_list)
+        main_menu(try_agains, question_list)
     elif user_action == "4":
         try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
@@ -197,7 +193,9 @@ def main_menu(try_agains = {}, **kwargs):
         else:
             main_menu()
     elif user_action == "9":
-        print("can't do that just yet")
+        print("No high scores just yet")
+        input("Press [ENTER] to continue...")
+        main_menu(try_agains, question_list)
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
