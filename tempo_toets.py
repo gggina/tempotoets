@@ -3,17 +3,14 @@ import time
 import random
 import os
 import datetime
+import json
 
 try_agains = {}
-current_top_time = 0
-total_lists_this_session = 0
-lists_this_session = {}
-
+high_scores = {}
 
 def generate_questions(total_questions, up_to_table):
     question_list = {}
     global lists_this_session
-    global total_lists_this_session
     for q in range(0, total_questions):
         a = random.randint(2, (up_to_table))
         b = random.randint(2, 12)
@@ -25,8 +22,6 @@ def generate_questions(total_questions, up_to_table):
             question_list[q] = [(str(c) + ":" + str(a) + "= "), b]
         else:
             question_list[q] = [(str(a) + "x" + str(b) + "= "), c]
-    total_lists_this_session +=1
-    lists_this_session[total_lists_this_session]= question_list
     return question_list
 
 def print_question_list(question_list):
@@ -61,11 +56,8 @@ def answer_question(question_list, q):
         return result
 
 def ask_question(question_list):
-    os.system('cls||clear')
     global try_agains
-    print("<><><><><><><><><><><><><><>")
-    print("<>      TEMPO TOETS       <>")
-    print("<><><><><><><><><><><><><><>\n")
+    header()
     print("[m] - Back to the main menu\n")
     print("STARTING THE TIMER...\n")
     start = time.time()
@@ -106,15 +98,13 @@ def ask_question(question_list):
     return try_agains
 
 def do_the_tempo_toets():
-    os.system('cls||clear')
     correct = 0
     incorrect = 0
     global try_agains
     question_list = generate_questions(1000,10)
     header()
     player = input("Who's playing?")
-    os.system('cls||clear')
-    header()
+    game_time = header()
     print("This is it", player, "- you get 1 minute...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
@@ -141,7 +131,7 @@ def do_the_tempo_toets():
     print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
     print("\n\n")
     if correct > incorrect:
-        high_score_check(correct)
+        high_score_check(correct, game_time, player)
     input("hit [ENTER] to see your results")
     print("\nCORRECT answers:", correct)
     print("INCORRECT answers: ", incorrect)
@@ -155,15 +145,28 @@ def do_the_tempo_toets():
         print("ALL CORRECT!!!")
         print("-- -- -- -- -- --\n")
 
-def high_score_check(total_correct):
-    # todo
-    pass
+def high_score_check(total_correct, game_time, player):
+    global high_scores
+    high_scores[total_correct]=[player,game_time]
 
 def read_high_score():
-    # todo
-    pass
+    global high_scores
+    top_scores = list(high_scores.keys())
+    if len(high_scores) > 0:
+        for s in range(0,5):
+            try:
+                score = top_scores[s]
+                print((s+1), ">", high_scores[score][0], "-", score, "correct -", high_scores[score][1])
+            except IndexError:
+                print((s+1), "> ...")
+
+    else:
+        header()
+        print("\nNo High scores saved yet...")
+        print("Play the TEMPO TOETS to set a high score")
 
 def header():
+    os.system('cls||clear')
     right_now = datetime.datetime.today()
     pretty_datetime = right_now.ctime()
     print("> ---------------------------- <")
@@ -172,9 +175,9 @@ def header():
     print(">  ", pretty_datetime, "  <")
     print("> ---------------------------- <")
     print("\n")
+    return pretty_datetime
 
 def main_menu(try_agains = {}, question_list = {}):
-    os.system('cls||clear')
     qlist = False
     trylist = False
     header()
@@ -228,8 +231,10 @@ def main_menu(try_agains = {}, question_list = {}):
         else:
             main_menu()
     elif user_action == "9":
-        print("No high scores just yet")
-        input("Press [ENTER] to continue...")
+        header()
+        read_high_score()
+        print("")
+        input("Press [ENTER] to go back to the menu...")
         main_menu(try_agains, question_list)
     elif user_action == "q":
         print ("...goodbye")
