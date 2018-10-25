@@ -191,6 +191,9 @@ def header():
     return pretty_datetime
 
 def main_menu(try_agains = {}):
+    file = open('question_log', 'wb')
+    pickle.dump(question_log, file)
+    file.close()
     global question_list
     qlist = False
     trylist = False
@@ -270,6 +273,5 @@ def main_menu(try_agains = {}):
         raise SystemExit
     else:
         main_menu(try_agains)
-
 
 main_menu()
