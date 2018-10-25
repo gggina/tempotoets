@@ -9,30 +9,31 @@ file = open('high_scores', 'rb')
 high_scores = pickle.load(file)
 file.close()
 
-def generate_questions(total_questions, up_to_table):
+file = open('question_log', 'rb')
+question_log = pickle.load(file)
+file.close()
+
+question_list = {}
+
+#below is still used for practice mode
+def generate_questions(total_questions):
+    global question_log
     question_list = {}
-    for q in range(0, total_questions):
-        a = random.randint(2, (up_to_table))
-        b = random.randint(2, 12)
-        c = a*b
-        multi_or_divi = random.randint(1,6)
-        if multi_or_divi ==2:
-            question_list[q] = [(str(b) + "x" + str(a) + "= "), c]
-        elif multi_or_divi == 2 or multi_or_divi == 3:
-            question_list[q] = [(str(c) + ":" + str(a) + "= "), b]
-        else:
-            question_list[q] = [(str(a) + "x" + str(b) + "= "), c]
+    for q in range(1, (total_questions+1)):
+        new_q = random.randint(1,len(question_log))
+        question_list[new_q] = question_log[new_q]
     return question_list
 
-def print_question_list(question_list):
-    for q in question_list:
-        print("question", q+1, " >> ", str(question_list[q][0]) + str(question_list[q][1]), end="")
-        if len(question_list[q]) >= 2:
-            print("  <<  ...you answered", question_list[q][-1])
+def print_question_list(ids_guesses):
+    global question_log
+    for q in ids_guesses:
+        print("question", ids_guesses[q][0], " >> ", str(question_log[q][0]) + str(question_log[q][1]), end="")
+        print("  <<  ...you answered", ids_guesses[q][-1])
 
-def answer_question(question_list, q):
-    print("question", q+1, "> ", end="")
-    answer = input(question_list[q][0])
+def answer_question(question_id, q):
+    global question_log
+    print("question", q, "> ", end="")
+    answer = input(question_log[question_id][0])
     if answer == "m":
         result = "menu"
         return result
@@ -42,20 +43,19 @@ def answer_question(question_list, q):
         if answer == 0:
             result = "invalid"
             return result
-        elif answer == question_list[q][1]:
+        elif answer == question_log[question_id][1]:
             result = "correct"
             return result
         else:
             result = "incorrect"
-            this_error = len(try_agains)
-            try_agains[this_error]= question_list[q]
-            try_agains[this_error].append(answer)
+            try_agains[question_id]= [q]
+            try_agains[question_id].append(answer)
             return result
     except ValueError:
         result = "invalid"
         return result
 
-def ask_question(question_list):
+def ask_question(qs_to_ask):
     global try_agains
     header()
     print("[m] - Back to the main menu\n")
@@ -64,18 +64,20 @@ def ask_question(question_list):
     correct = 0
     incorrect = 0
     try_agains={}
-    for q in question_list:
-        result = answer_question(question_list, q)
+    q = 1
+    for n in qs_to_ask:
+        result = answer_question(n, q)
         if result == "correct":
             correct +=1
         elif result == "incorrect":
             incorrect +=1
         elif result == "invalid":
             print("you're wasting time - enter a number higher than 0")
-            answer_question(question_list,q)
+            answer_question(n,q)
         else:
             input("hit [ENTER] to go back to the main menu")
-            main_menu(try_agains, question_list)
+            main_menu(try_agains)
+        q +=1
     print("\nSTOPPING THE TIMER...")
     end = time.time()
     total_time = round((end-start),2)
@@ -101,30 +103,34 @@ def do_the_tempo_toets():
     correct = 0
     incorrect = 0
     global try_agains
+    global question_log
     quiz_time = 60
     try_agains = {}
-    question_list = generate_questions(1000,10)
     game_time = header()
     player = input("Who's playing? ")
     print("This is it - you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
-    for q in question_list:
-        result = answer_question(question_list, q)
+    q = 1
+    total_time = quiz_time-1
+    while total_time < quiz_time:
+        question_id = random.randint(1, (len(question_log)))
+        result = answer_question(question_id, q)
         if result == "correct":
             correct +=1
+            question_log[question_id][2] += 1
         elif result == "incorrect":
             incorrect +=1
+            question_log[question_id][3] += 1
         elif result == "invalid":
             print("you're wasting time - enter a number higher than 0")
-            answer_question(question_list,q)
+            answer_question(question_id, q)
         else:
             input("hit [ENTER] to go back to the main menu")
-            main_menu(try_agains, question_list)
+            main_menu(try_agains)
+        q +=1
         total_time = round((time.time()-start),2)
-        if total_time > quiz_time:
-            break
     print("STOP!!")
     print("time's up.")
     print("...............")
@@ -184,7 +190,8 @@ def header():
     print("\n")
     return pretty_datetime
 
-def main_menu(try_agains = {}, question_list = {}):
+def main_menu(try_agains = {}):
+    global question_list
     qlist = False
     trylist = False
     header()
@@ -206,22 +213,23 @@ def main_menu(try_agains = {}, question_list = {}):
     print("\n")
     user_action = input("What do you want to do?")
     if user_action == "2":
-        top_table = int(input("What's the top table you want to practice?"))
         number_of_questions = int(input("how many questions do you want?"))
-        question_list = generate_questions(number_of_questions,top_table)
+        question_list = generate_questions(number_of_questions)
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
-        main_menu(try_agains, question_list)
+        main_menu(try_agains)
     elif user_action == "3" and qlist == True:
         num_list = list(range(len(question_list)))
-        random.shuffle(num_list)
+        old_qs = list(question_list.keys())
+        random.shuffle(old_qs)
         new_question_list = {}
-        for i in range(len(num_list)):
-            new_question = num_list[i]
-            new_question_list[i] = question_list[new_question]
+        for i in range(len(old_qs)):
+            new_question = old_qs[i]
+            print(new_question)
+            new_question_list[new_question] = question_list[new_question]
         try_agains = ask_question(new_question_list)
         input("Press [ENTER] to continue...")
-        main_menu(try_agains, question_list)
+        main_menu(try_agains)
     elif user_action == "4" and trylist == True:
         try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
@@ -242,7 +250,7 @@ def main_menu(try_agains = {}, question_list = {}):
         read_high_score()
         print("")
         input("Press [ENTER] to go back to the menu...")
-        main_menu(try_agains, question_list)
+        main_menu(try_agains)
     elif user_action == "clear high scores":
         action = input("Clear high scores? (y/n)")
         if action == "y":
@@ -253,15 +261,15 @@ def main_menu(try_agains = {}, question_list = {}):
             file.close()
             print("High scores cleared - no going back.")
             input("Press [ENTER] to go back to the menu and start again...")
-            main_menu(try_agains, question_list)
+            main_menu(try_agains)
         else:
             input("Press [ENTER] to pretend this never happened...")
-            main_menu(try_agains, question_list)
+            main_menu(try_agains)
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
     else:
-        main_menu(try_agains, question_list)
+        main_menu(try_agains)
 
 
 main_menu()
