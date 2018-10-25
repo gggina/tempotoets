@@ -1,16 +1,16 @@
-from functools import wraps
 import time
 import random
 import os
 import datetime
-import json
+import pickle
 
 try_agains = {}
-high_scores = {}
+file = open('high_scores', 'rb')
+high_scores = pickle.load(file)
+file.close()
 
 def generate_questions(total_questions, up_to_table):
     question_list = {}
-    global lists_this_session
     for q in range(0, total_questions):
         a = random.randint(2, (up_to_table))
         b = random.randint(2, 12)
@@ -101,15 +101,14 @@ def do_the_tempo_toets():
     correct = 0
     incorrect = 0
     global try_agains
+    try_agains = {}
     question_list = generate_questions(1000,10)
-    header()
-    player = input("Who's playing?")
     game_time = header()
-    print("This is it", player, "- you get 1 minute...\nSee how many questions you can answer!\n")
+    player = input("Who's playing? ")
+    print("This is it - you get 1 minute...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
-#    print(question_list)
     for q in question_list:
         result = answer_question(question_list, q)
         if result == "correct":
@@ -123,7 +122,7 @@ def do_the_tempo_toets():
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains, question_list)
         total_time = round((time.time()-start),2)
-        if total_time > 60:
+        if total_time > 5:
             break
     print("STOP!!")
     print("time's up.")
@@ -131,7 +130,7 @@ def do_the_tempo_toets():
     print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
     print("\n\n")
     if correct > incorrect:
-        high_score_check(correct, game_time, player)
+        high_score_check(correct, incorrect, game_time, player)
     input("hit [ENTER] to see your results")
     print("\nCORRECT answers:", correct)
     print("INCORRECT answers: ", incorrect)
@@ -145,18 +144,26 @@ def do_the_tempo_toets():
         print("ALL CORRECT!!!")
         print("-- -- -- -- -- --\n")
 
-def high_score_check(total_correct, game_time, player):
+def high_score_check(total_correct, total_incorrect, game_time, player):
     global high_scores
-    high_scores[total_correct]=[player,game_time]
+    success_perecentage = round((total_correct /(total_correct + total_incorrect))*100)
+    if total_correct in high_scores:
+        print("tied with", high_scores[total_correct][0])
+    else:
+        high_scores[total_correct]=[player,success_perecentage, game_time]
+    file = open('high_scores', 'wb')
+    pickle.dump(high_scores, file)
+    file.close()
 
 def read_high_score():
     global high_scores
     top_scores = list(high_scores.keys())
+    top_scores = sorted(top_scores, reverse = True)
     if len(high_scores) > 0:
-        for s in range(0,5):
+        for s in range(0,10):
             try:
                 score = top_scores[s]
-                print((s+1), ">", high_scores[score][0], "-", score, "correct -", high_scores[score][1])
+                print((s+1), ">", high_scores[score][0], "-", score, "correct ("+str(high_scores[score][1])+"%)-", high_scores[score][2])
             except IndexError:
                 print((s+1), "> ...")
 
