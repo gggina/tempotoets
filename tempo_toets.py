@@ -101,11 +101,12 @@ def do_the_tempo_toets():
     correct = 0
     incorrect = 0
     global try_agains
+    quiz_time = 60
     try_agains = {}
     question_list = generate_questions(1000,10)
     game_time = header()
     player = input("Who's playing? ")
-    print("This is it - you get 1 minute...\nSee how many questions you can answer!\n")
+    print("This is it - you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
@@ -122,7 +123,7 @@ def do_the_tempo_toets():
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains, question_list)
         total_time = round((time.time()-start),2)
-        if total_time > 5:
+        if total_time > quiz_time:
             break
     print("STOP!!")
     print("time's up.")
@@ -166,7 +167,6 @@ def read_high_score():
                 print((s+1), ">", high_scores[score][0], "-", score, "correct ("+str(high_scores[score][1])+"%)-", high_scores[score][2])
             except IndexError:
                 print((s+1), "> ...")
-
     else:
         header()
         print("\nNo High scores saved yet...")
@@ -243,6 +243,20 @@ def main_menu(try_agains = {}, question_list = {}):
         print("")
         input("Press [ENTER] to go back to the menu...")
         main_menu(try_agains, question_list)
+    elif user_action == "clear high scores":
+        action = input("Clear high scores? (y/n)")
+        if action == "y":
+            global high_scores
+            high_scores = {}
+            file = open('high_scores', 'wb')
+            pickle.dump(high_scores, file)
+            file.close()
+            print("High scores cleared - no going back.")
+            input("Press [ENTER] to go back to the menu and start again...")
+            main_menu(try_agains, question_list)
+        else:
+            input("Press [ENTER] to pretend this never happened...")
+            main_menu(try_agains, question_list)
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
