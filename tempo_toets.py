@@ -14,6 +14,7 @@ question_log = pickle.load(file)
 file.close()
 
 question_list = {}
+tough_list = {}
 
 #below is still used for practice mode
 def generate_questions(total_questions):
@@ -32,6 +33,7 @@ def print_question_list(ids_guesses):
 
 def answer_question(question_id, q):
     global question_log
+    question_log[question_id][4] +=1
     print("question", q, "> ", end="")
     answer = input(question_log[question_id][0])
     if answer == "m":
@@ -190,11 +192,34 @@ def header():
     print("\n")
     return pretty_datetime
 
+def question_stats():
+    header()
+    global question_log
+    global tough_list
+    tough_list = {}
+    tricky_ones = {}
+    fails = []
+    for q in question_log:
+        if question_log[q][4] > 0:
+            fail_ratio = round(((question_log[q][3])/question_log[q][4])*100)
+            if fail_ratio > 0:
+                tricky_ones[q] = [fail_ratio, q]
+                if fail_ratio not in fails:
+                    fails.append(fail_ratio)
+    fails = sorted(fails, reverse=True)
+    for fail in fails:
+        for tricky_q in tricky_ones:
+            if tricky_ones[tricky_q][0] == fail:
+                tricky_q_id = tricky_ones[tricky_q][1]
+                print((100-fail), "% correct answers for:", question_log[tricky_q_id][0], question_log[tricky_q_id][1])
+                tough_list[tricky_q_id] = question_log[tricky_q_id]
+
 def main_menu(try_agains = {}):
     file = open('question_log', 'wb')
     pickle.dump(question_log, file)
     file.close()
     global question_list
+    global tough_list
     qlist = False
     trylist = False
     header()
@@ -209,6 +234,9 @@ def main_menu(try_agains = {}):
     if len(try_agains) >0:
         trylist = True
         print("[4] - Just the questions you got wrong last time")
+    if len(tough_list) >0:
+        toughlist = True
+        print("[5] - ** TRY THE TRICKY QUESTIONS!!! **")
     print("\n")
     print("----------------")
     print("[9] - high scores")
@@ -236,11 +264,21 @@ def main_menu(try_agains = {}):
     elif user_action == "4" and trylist == True:
         try_agains = ask_question(try_agains)
         input("Press [ENTER] to continue...")
-        print(len(try_agains))
-        if try_agains and len(try_agains) > 0:
-            main_menu(try_agains)
+        main_menu(try_agains)
+    elif user_action == "5" and toughlist == True:
+        if len(tough_list) > 10:
+            old_qs = list(tough_list.keys())
+            random.shuffle(old_qs)
+            tough_play_list = {}
+            for i in range(10):
+                new_question = old_qs[i]
+                tough_play_list[new_question] = tough_list[new_question]
+            print(len(tough_play_list))
         else:
-            main_menu()
+            tough_play_list = tough_list
+        try_agains = ask_question(tough_play_list)
+        input("Press [ENTER] to continue...")
+        main_menu(try_agains)
     elif user_action == "1":
         try_agains = do_the_tempo_toets()
         input("Press [ENTER] to continue...")
@@ -268,6 +306,12 @@ def main_menu(try_agains = {}):
         else:
             input("Press [ENTER] to pretend this never happened...")
             main_menu(try_agains)
+    elif user_action == "stats":
+        question_stats()
+        print("")
+        input("Press [ENTER] to go back to the menu...")
+        main_menu(try_agains)
+
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
