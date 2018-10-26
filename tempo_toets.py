@@ -117,7 +117,11 @@ def do_the_tempo_toets():
     q = 1
     total_time = quiz_time-1
     while total_time < quiz_time:
+        this_quiz = []
         question_id = random.randint(1, (len(question_log)))
+        while question_id in this_quiz:
+            question_id = random.randint(1, (len(question_log)))
+        this_quiz.append(question_id)
         result = answer_question(question_id, q)
         if result == "correct":
             correct +=1
@@ -202,7 +206,7 @@ def question_stats():
     for q in question_log:
         if question_log[q][4] > 0:
             fail_ratio = round(((question_log[q][3])/question_log[q][4])*100)
-            if fail_ratio > 0:
+            if fail_ratio > 19:
                 tricky_ones[q] = [fail_ratio, q]
                 if fail_ratio not in fails:
                     fails.append(fail_ratio)
@@ -236,10 +240,11 @@ def main_menu(try_agains = {}):
         print("[4] - Just the questions you got wrong last time")
     if len(tough_list) >0:
         toughlist = True
-        print("[5] - ** TRY THE TRICKY QUESTIONS!!! **")
+        print("[5] - ** TRY 10 TRICKY QUESTIONS!!! **")
     print("\n")
     print("----------------")
     print("[9] - high scores")
+    print("[stats] - find out the tricky questions")
     print("[q] - quit this game")
     print("\n")
     user_action = input("What do you want to do?")
