@@ -5,10 +5,13 @@ import datetime
 import pickle
 
 try_agains = {}
+
+# high_scores = {total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}
 file = open('high_scores', 'rb')
 high_scores = pickle.load(file)
 file.close()
 
+#question log =  {questionid: [question, answer, correct#, incorrect#, total_asks]
 file = open('question_log', 'rb')
 question_log = pickle.load(file)
 file.close()
@@ -16,8 +19,10 @@ file.close()
 question_list = {}
 tough_list = {}
 
-#below is still used for practice mode
 def generate_questions(total_questions):
+    """
+    used in practice mode only. generates a random number (question_id) and uses this to compile a question_list form the question_log.
+    """
     global question_log
     question_list = {}
     for q in range(1, (total_questions+1)):
@@ -32,9 +37,12 @@ def print_question_list(ids_guesses):
         print("  <<  ...you answered", ids_guesses[q][-1])
 
 def answer_question(question_id, q):
+    """
+    asks the question_id from the question_log (question number q in the current quiz)
+    used by all quiz options
+    """
     global question_log
     question_log[question_id][4] +=1
-#    print(question_id, "question", q, "> ", end="")
     print("question", q, "> ", end="")
     answer = input(question_log[question_id][0])
     if answer == "m":
@@ -59,6 +67,9 @@ def answer_question(question_id, q):
         return result
 
 def ask_question(qs_to_ask):
+    """
+    practice mode asks the qs_to_ask
+    """
     global try_agains
     header()
     print("[m] - Back to the main menu\n")
@@ -70,13 +81,13 @@ def ask_question(qs_to_ask):
     q = 1
     for n in qs_to_ask:
         result = answer_question(n, q)
+        while result == "invalid":
+            print("you're wasting time - enter a number higher than 0")
+            result = answer_question(n,q)
         if result == "correct":
             correct +=1
         elif result == "incorrect":
             incorrect +=1
-        elif result == "invalid":
-            print("you're wasting time - enter a number higher than 0")
-            answer_question(n,q)
         else:
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains)
@@ -103,11 +114,15 @@ def ask_question(qs_to_ask):
     return try_agains
 
 def do_the_tempo_toets():
+    """
+    The big toets.
+    change the quiz_time to make toets longer or shorter
+    """
     global try_agains
     global question_log
     correct = 0
     incorrect = 0
-    quiz_time = 10
+    quiz_time =5
     try_agains = {}
     header()
     player = input("Who's playing? ")
@@ -121,22 +136,28 @@ def do_the_tempo_toets():
     start = time.time()
     q = 1
     total_time = quiz_time-1
+    this_quiz = []
+    invalid_answers = 0
     while total_time < quiz_time:
-        this_quiz = []
         question_id = random.randint(1, (len(question_log)))
         while question_id in this_quiz:
             question_id = random.randint(1, (len(question_log)))
         this_quiz.append(question_id)
         result = answer_question(question_id, q)
+        while result == "invalid":
+            if invalid_answers <3:
+                print("you're wasting time - enter a number higher than 0")
+                invalid_answers +=1
+                result = answer_question(question_id, q)
+            else:
+                print("too much time wasting! Goodbye")
+                result = "forced exit"
         if result == "correct":
             correct +=1
             question_log[question_id][2] += 1
         elif result == "incorrect":
             incorrect +=1
             question_log[question_id][3] += 1
-        elif result == "invalid":
-            print("you're wasting time - enter a number higher than 0")
-            answer_question(question_id, q)
         else:
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains)
@@ -163,6 +184,10 @@ def do_the_tempo_toets():
         print("-- -- -- -- -- --\n")
 
 def high_score_check(total_correct, total_incorrect, player):
+    """
+    Checks if the results of a tempo toets warrant adding to the high_scores list
+    Persists an updated high_scores list to the high_scores file using pickle
+    """
     global high_scores
     success_perecentage = round((total_correct /(total_correct + total_incorrect))*100)
     if total_correct in high_scores:
@@ -177,6 +202,11 @@ def high_score_check(total_correct, total_incorrect, player):
     file.close()
 
 def read_high_score():
+    """
+    Prints the top 10 high scores from the high_scores list
+    All tempotoets scores/names are stored if there were more correct answers than wrong answers
+    high scores are calculated by total correct answers and then success_ratio
+    """
     global high_scores
     high_score_keys = list(high_scores.keys())
     top_scores = sorted(high_score_keys, reverse = True)
@@ -188,7 +218,8 @@ def read_high_score():
                 success_ratio_keys = sorted(list(high_scores[answered_correctly].keys()), reverse =True)
                 for s_r in success_ratio_keys:
                     top_scoring_names = []
-                    print(rank, ">", end="")
+                    print(rank, "> ", end="")
+                    print(str(answered_correctly), "correct ("+ str(s_r) + "%) -", end = "")
                     for name in high_scores[answered_correctly][s_r]:
                         top_scoring_names.append(name)
                     top_scoring_names = top_scoring_names[::-1]
@@ -197,12 +228,18 @@ def read_high_score():
                         if name_num <= 4:
                             print(" ["+  tsn + "]", end = "")
                             name_num +=1
-                    print("  - " + str(answered_correctly), "correct, "+ str(s_r) + "%")
+                    print("")
                     rank +=1
             except IndexError:
                 print((top_score+1), "> ...")
+    else:
+        print("No high scores yet!\n")
 
 def header():
+    """
+    Printed at the top of every screen
+    returns a nicely formatted datetime that could be used for storing data
+    """
     os.system('cls||clear')
     right_now = datetime.datetime.today()
     pretty_datetime = right_now.ctime()
@@ -215,29 +252,59 @@ def header():
     return pretty_datetime
 
 def question_stats():
+    """
+    Checks the question log for questions that have been asked with a fail ratio (incorrect answer/total asks) of 20%
+    Prints all matching question/answers with associated stats
+    Generates the 'tough_list' which is used to practice with tricky questions
+    !! Without running stats there is no tough_list, so the practice with tricky questions option will not be available !!
+    """
     header()
     global question_log
     global tough_list
     tough_list = {}
     tricky_ones = {}
     fails = []
-    for q in question_log:
-        if question_log[q][4] > 0:
-            fail_ratio = round(((question_log[q][3])/question_log[q][4])*100)
+    for q_id in question_log:
+        if question_log[q_id][4] > 0:
+            fail_ratio = round(((question_log[q_id][3])/question_log[q_id][4])*100)
             if fail_ratio > 19:
-                tricky_ones[q] = [fail_ratio, q]
+                tricky_ones[q_id] = [fail_ratio, q_id]
                 if fail_ratio not in fails:
                     fails.append(fail_ratio)
     fails = sorted(fails, reverse=True)
-    for fail in fails:
-        for tricky_q in tricky_ones:
-            if tricky_ones[tricky_q][0] == fail:
-                tricky_q_id = tricky_ones[tricky_q][1]
-                print((100-fail), "% correct answers for:", question_log[tricky_q_id][0], question_log[tricky_q_id][1], end ="")
-                print("  (total asks " + str(question_log[tricky_q_id][4]) + ")")
-                tough_list[tricky_q_id] = question_log[tricky_q_id]
+    if len(fails) > 0:
+        print("Questions with fail rate of 20% or more:\n")
+        tricky_rank = 1
+        for fail_perc in fails:
+            for tricky_q in tricky_ones:
+                if tricky_ones[tricky_q][0] == fail_perc:
+                    tricky_q_id = tricky_ones[tricky_q][1]
+                    print(tricky_rank, ">", question_log[tricky_q_id][0] + str(question_log[tricky_q_id][1]), " -", (100-fail_perc), "% correct", end ="")
+                    print(" (" + str(question_log[tricky_q_id][4]) + " attempts)")
+                    tough_list[tricky_q_id] = question_log[tricky_q_id]
+                    tricky_rank +=1
+    else:
+        print("All questions are successfully answered at least 80% of the time.\n")
+
+
+def the_unaskeds():
+    header()
+    global question_log
+    unaskeds = []
+    for q_id in question_log:
+        if question_log[q_id][4] == 0:
+            unaskeds.append(q_id)
+    if len(unaskeds) > 0:
+        print("Questions with 0 asks:\n")
+        for q_id in unaskeds:
+            print(">", question_log[q_id][0] + str(question_log[q_id][1]))
+    else:
+        print("All questions have been asked at least once.")
 
 def main_menu(try_agains = {}):
+    """
+    the main menu. hidden option is "clear high scores"
+    """
     file = open('question_log', 'wb')
     pickle.dump(question_log, file)
     file.close()
@@ -245,6 +312,7 @@ def main_menu(try_agains = {}):
     global tough_list
     qlist = False
     trylist = False
+    toughlist = False
     header()
     print("TOETS MODE...")
     print("[1] - Do the TEMPO TOETS!!!")
@@ -262,19 +330,24 @@ def main_menu(try_agains = {}):
         print("[5] - ** TRY SOME TRICKY QUESTIONS!!! **")
     print("\n")
     print("----------------")
-    print("[9] - high scores")
+    print("[9] - TEMPO TOETS high scores")
     print("[stats] - find out the tricky questions")
     print("[q] - quit this game")
     print("\n")
     user_action = input("What do you want to do?")
     if user_action == "2":
-        number_of_questions = int(input("how many questions do you want?"))
+        number_of_questions = input("how many questions do you want?")
+        try:
+            number_of_questions = int(number_of_questions)
+        except ValueError:
+            number_of_questions = 10
+            print("Not a valid input - will generate a list with 10 questions.")
+            input("Press [ENTER] to continue...")
         question_list = generate_questions(number_of_questions)
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue...")
         main_menu(try_agains)
     elif user_action == "3" and qlist == True:
-        num_list = list(range(len(question_list)))
         old_qs = list(question_list.keys())
         random.shuffle(old_qs)
         new_question_list = {}
@@ -332,6 +405,9 @@ def main_menu(try_agains = {}):
             main_menu(try_agains)
     elif user_action == "stats":
         question_stats()
+        print("")
+        input("Press [ENTER] to list questions that have not yet been asked...")
+        the_unaskeds()
         print("")
         input("Press [ENTER] to go back to the menu...")
         main_menu(try_agains)
