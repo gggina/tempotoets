@@ -34,6 +34,7 @@ def print_question_list(ids_guesses):
 def answer_question(question_id, q):
     global question_log
     question_log[question_id][4] +=1
+#    print(question_id, "question", q, "> ", end="")
     print("question", q, "> ", end="")
     answer = input(question_log[question_id][0])
     if answer == "m":
@@ -102,15 +103,19 @@ def ask_question(qs_to_ask):
     return try_agains
 
 def do_the_tempo_toets():
-    correct = 0
-    incorrect = 0
     global try_agains
     global question_log
-    quiz_time = 60
+    correct = 0
+    incorrect = 0
+    quiz_time = 10
     try_agains = {}
-    game_time = header()
+    header()
     player = input("Who's playing? ")
-    print("This is it - you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
+    while len(player)<1:
+        player = input("you need to enter a name so i can save your score...\n")
+    while len(player)>10:
+        player = input("try again - this time, keep it a bit shorter (max 10 chars)...\n")
+    print("Good to see you", player, "- you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
@@ -143,7 +148,7 @@ def do_the_tempo_toets():
     print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
     print("\n\n")
     if correct > incorrect:
-        high_score_check(correct, incorrect, game_time, player)
+        high_score_check(correct, incorrect, player)
     input("hit [ENTER] to see your results")
     print("\nCORRECT answers:", correct)
     print("INCORRECT answers: ", incorrect)
@@ -157,32 +162,45 @@ def do_the_tempo_toets():
         print("ALL CORRECT!!!")
         print("-- -- -- -- -- --\n")
 
-def high_score_check(total_correct, total_incorrect, game_time, player):
+def high_score_check(total_correct, total_incorrect, player):
     global high_scores
     success_perecentage = round((total_correct /(total_correct + total_incorrect))*100)
     if total_correct in high_scores:
-        print("tied with", high_scores[total_correct][0])
+        if success_perecentage in high_scores[total_correct]:
+            high_scores[total_correct][success_perecentage].append(player)
+        else:
+            high_scores[total_correct][success_perecentage]=[player]
     else:
-        high_scores[total_correct]=[player,success_perecentage, game_time]
+        high_scores[total_correct] = {success_perecentage: [player]}
     file = open('high_scores', 'wb')
     pickle.dump(high_scores, file)
     file.close()
 
 def read_high_score():
     global high_scores
-    top_scores = list(high_scores.keys())
-    top_scores = sorted(top_scores, reverse = True)
+    high_score_keys = list(high_scores.keys())
+    top_scores = sorted(high_score_keys, reverse = True)
+    rank = 1
     if len(high_scores) > 0:
-        for s in range(0,10):
+        for top_score in range(10):
             try:
-                score = top_scores[s]
-                print((s+1), ">", high_scores[score][0], "-", score, "correct ("+str(high_scores[score][1])+"%)-", high_scores[score][2])
+                answered_correctly = top_scores[top_score]
+                success_ratio_keys = sorted(list(high_scores[answered_correctly].keys()), reverse =True)
+                for s_r in success_ratio_keys:
+                    top_scoring_names = []
+                    print(rank, ">", end="")
+                    for name in high_scores[answered_correctly][s_r]:
+                        top_scoring_names.append(name)
+                    top_scoring_names = top_scoring_names[::-1]
+                    name_num=1
+                    for tsn in top_scoring_names:
+                        if name_num <= 4:
+                            print(" ["+  tsn + "]", end = "")
+                            name_num +=1
+                    print("  - " + str(answered_correctly), "correct, "+ str(s_r) + "%")
+                    rank +=1
             except IndexError:
-                print((s+1), "> ...")
-    else:
-        header()
-        print("\nNo High scores saved yet...")
-        print("Play the TEMPO TOETS to set a high score")
+                print((top_score+1), "> ...")
 
 def header():
     os.system('cls||clear')
@@ -215,7 +233,8 @@ def question_stats():
         for tricky_q in tricky_ones:
             if tricky_ones[tricky_q][0] == fail:
                 tricky_q_id = tricky_ones[tricky_q][1]
-                print((100-fail), "% correct answers for:", question_log[tricky_q_id][0], question_log[tricky_q_id][1])
+                print((100-fail), "% correct answers for:", question_log[tricky_q_id][0], question_log[tricky_q_id][1], end ="")
+                print("  (total asks " + str(question_log[tricky_q_id][4]) + ")")
                 tough_list[tricky_q_id] = question_log[tricky_q_id]
 
 def main_menu(try_agains = {}):
@@ -240,7 +259,7 @@ def main_menu(try_agains = {}):
         print("[4] - Just the questions you got wrong last time")
     if len(tough_list) >0:
         toughlist = True
-        print("[5] - ** TRY 10 TRICKY QUESTIONS!!! **")
+        print("[5] - ** TRY SOME TRICKY QUESTIONS!!! **")
     print("\n")
     print("----------------")
     print("[9] - high scores")
