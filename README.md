@@ -1,6 +1,8 @@
 # tempo_toets
 a timed times table test
 
+** requires python 3 and pickle **
+
 This is a fun quiz to train your brain on times tables from 2 through to 12.
 
 FIRST RUN:
