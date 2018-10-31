@@ -18,7 +18,7 @@ tough_list = {}
 question_log = {}
 high_scores= {}
 
-# high_scores = {total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}
+# high_scores = {quiz_time:{total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}}
 
 def set_highscore_questionlog ():
     global high_scores
@@ -76,8 +76,17 @@ def generate_questions(total_questions):
 def print_question_list(ids_guesses):
     global question_log
     for q in ids_guesses:
-        print("question", ids_guesses[q][0], " >> ", str(question_log[q][0]) + str(question_log[q][1]), end="")
-        print("  <<  ...you answered", ids_guesses[q][-1])
+        question_number = ids_guesses[q][0]
+        question = question_log[q][0]
+        correct_answer = str(question_log[q][1])
+        player_answer = str(ids_guesses[q][-1])
+        while len(question) <8:
+            question = question + " "
+        while len(player_answer) <4:
+            player_answer = player_answer + " "
+        while len(correct_answer) < 3:
+            correct_answer = correct_answer + " "
+        print("question {0} > {1}your answer: {2} correct answer:  >> {1}{3} <<".format(question_number, question, player_answer, correct_answer))
 
 def generate_walkthrough_question_list(tafel):
     global question_log
@@ -105,8 +114,8 @@ def answer_question(question_id, q):
     """
     global question_log
     question_log[question_id][4] +=1
-    print("question", q, "> ", end="")
-    answer = input(question_log[question_id][0])
+    question = question_log[question_id][0]
+    answer = input("question {0} > {1}".format(q, question))
     if answer == "m":
         result = "menu"
         return result
@@ -171,6 +180,7 @@ def ask_question(qs_to_ask):
         print("-- -- -- -- -- --\n")
     else:
         print("\n-- -- -- -- -- --")
+        print("You answered {} question(s) incorrectly:\n".format(len(try_agains)))
         print_question_list(try_agains)
         print("-- -- -- -- -- --\n")
     return try_agains
@@ -290,23 +300,32 @@ def read_high_score():
         for top_score in range(10):
             try:
                 answered_correctly = top_scores[top_score]
+                answered_correctly_string = str(answered_correctly)
                 success_ratio_keys = sorted(list(current_high_scores[answered_correctly].keys()), reverse =True)
                 for s_r in success_ratio_keys:
                     top_scoring_names = []
-                    print(rank, "> ", end="")
-                    print(str(answered_correctly), "correct ("+ str(s_r) + "%) -", end = "")
+                    current_rank = str(rank)
+                    while len(current_rank) <2:
+                        current_rank = current_rank + " "
+                    current_success_ratio = "(" + str(s_r) + "%)"
+                    while len(current_success_ratio) <6:
+                        current_success_ratio = current_success_ratio + " "
                     for name in current_high_scores[answered_correctly][s_r]:
                         top_scoring_names.append(name)
                     top_scoring_names = top_scoring_names[::-1]
                     name_num=1
+                    high_scorer_names = ""
                     for tsn in top_scoring_names:
                         if name_num <= 4:
-                            print(" ["+  tsn + "]", end = "")
+                            high_scorer_names = high_scorer_names+" ["+  tsn + "]"
                             name_num +=1
-                    print("")
+                    print("{0} >  {1} correct {2} -{3}".format(current_rank, answered_correctly_string, current_success_ratio, high_scorer_names))
                     rank +=1
             except IndexError:
-                print((top_score+1), "> ...")
+                current_rank = str(top_score+1)
+                while len(current_rank) <2:
+                    current_rank = current_rank + " "
+                print("{} > ...".format(current_rank))
     else:
         print("No high scores yet!\n")
 
@@ -354,12 +373,23 @@ def question_stats():
             for tricky_q in tricky_ones:
                 if tricky_ones[tricky_q][0] == fail_perc:
                     tricky_q_id = tricky_ones[tricky_q][1]
-                    print(tricky_rank, ">", question_log[tricky_q_id][0] + str(question_log[tricky_q_id][1]), " -", (100-fail_perc), "% correct", end ="")
-                    print(" (" + str(question_log[tricky_q_id][4]) + " attempts)")
+                    tricky_question = question_log[tricky_q_id][0]
+                    tricky_answer = str(question_log[tricky_q_id][1]) + " "
+                    while len(tricky_question) + len(tricky_answer) < 13:
+                        tricky_answer = tricky_answer + "."
+                    current_tricky_rank = str(tricky_rank)
+                    success_rate = str(100-fail_perc) + "%"
+                    while len(success_rate) < 4:
+                        success_rate = success_rate + " "
+                    total_attempts = str(question_log[tricky_q_id][4])
+                    print("{0}> {1}{2} {3} correct ({4} attempts)".format(current_tricky_rank,tricky_question,tricky_answer, success_rate, total_attempts))
                     tough_list[tricky_q_id] = question_log[tricky_q_id]
                     tricky_rank +=1
     else:
-        print("All questions are successfully answered at least 80% of the time.\n")
+        if len(fails) == len(question_log):
+            print("No questions answered yet.\n")
+        else:
+            print("All questions are successfully answered at least 80% of the time.\n")
 
 
 def the_unaskeds():
@@ -501,9 +531,9 @@ def main_menu(try_agains = {}):
     elif user_action == "stats":
         question_stats()
         print("")
-        input("Press [ENTER] to list questions that have not yet been asked...")
-        the_unaskeds()
-        print("")
+#        input("Press [ENTER] to list questions that have not yet been asked...")
+#        the_unaskeds()
+#        print("")
         input("Press [ENTER] to go back to the menu...")
         main_menu(try_agains)
 
