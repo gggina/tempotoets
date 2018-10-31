@@ -251,14 +251,20 @@ def high_score_check(total_correct, total_incorrect, player):
     Persists an updated high_scores list to the high_scores file using pickle
     """
     global high_scores
-    success_perecentage = round((total_correct /(total_correct + total_incorrect))*100)
-    if total_correct in high_scores:
-        if success_perecentage in high_scores[total_correct]:
-            high_scores[total_correct][success_perecentage].append(player)
-        else:
-            high_scores[total_correct][success_perecentage]=[player]
+    global quiz_time
+    if quiz_time in high_scores:
+        current_high_scores = high_scores[quiz_time]
     else:
-        high_scores[total_correct] = {success_perecentage: [player]}
+        high_scores[quiz_time] = {}
+        current_high_scores = high_scores[quiz_time]
+    success_perecentage = round((total_correct /(total_correct + total_incorrect))*100)
+    if total_correct in current_high_scores:
+        if success_perecentage in current_high_scores[total_correct]:
+            current_high_scores[total_correct][success_perecentage].append(player)
+        else:
+           current_high_scores[total_correct][success_perecentage]=[player]
+    else:
+        current_high_scores[total_correct] = {success_perecentage: [player]}
     file = open('high_scores', 'wb')
     pickle.dump(high_scores, file)
     file.close()
@@ -270,19 +276,26 @@ def read_high_score():
     high scores are calculated by total correct answers and then success_ratio
     """
     global high_scores
-    high_score_keys = list(high_scores.keys())
-    top_scores = sorted(high_score_keys, reverse = True)
+    global quiz_time
+    if quiz_time in high_scores:
+        current_high_scores = high_scores[quiz_time]
+    else:
+        high_scores[quiz_time] = {}
+        current_high_scores = high_scores[quiz_time]
+    print("High scores for {} second tempotoets\n".format(quiz_time))
+    current_high_score_keys = list(current_high_scores.keys())
+    top_scores = sorted(current_high_score_keys, reverse = True)
     rank = 1
-    if len(high_scores) > 0:
+    if len(current_high_scores) > 0:
         for top_score in range(10):
             try:
                 answered_correctly = top_scores[top_score]
-                success_ratio_keys = sorted(list(high_scores[answered_correctly].keys()), reverse =True)
+                success_ratio_keys = sorted(list(current_high_scores[answered_correctly].keys()), reverse =True)
                 for s_r in success_ratio_keys:
                     top_scoring_names = []
                     print(rank, "> ", end="")
                     print(str(answered_correctly), "correct ("+ str(s_r) + "%) -", end = "")
-                    for name in high_scores[answered_correctly][s_r]:
+                    for name in current_high_scores[answered_correctly][s_r]:
                         top_scoring_names.append(name)
                     top_scoring_names = top_scoring_names[::-1]
                     name_num=1
