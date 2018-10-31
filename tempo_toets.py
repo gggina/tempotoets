@@ -3,21 +3,64 @@ import random
 import os
 import datetime
 import pickle
+import sys
+
+quiz_time = 60
+if len(sys.argv) > 1:
+    try:
+        quiz_time = int(sys.argv[1])
+    except:
+        pass
 
 try_agains = {}
-
-# high_scores = {total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}
-file = open('high_scores', 'rb')
-high_scores = pickle.load(file)
-file.close()
-
-#question log =  {questionid: [question, answer, correct#, incorrect#, total_asks]
-file = open('question_log', 'rb')
-question_log = pickle.load(file)
-file.close()
-
 question_list = {}
 tough_list = {}
+question_log = {}
+high_scores= {}
+
+# high_scores = {total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}
+
+def set_highscore_questionlog ():
+    global high_scores
+    global question_log
+    try:
+        file = open('high_scores', 'rb')
+        high_scores = pickle.load(file)
+        file.close()
+    except FileNotFoundError:
+        high_scores = {}
+
+    #question log =  {questionid: [question, answer, correct#, incorrect#, total_asks]
+    try:
+        file = open('question_log', 'rb')
+        question_log = pickle.load(file)
+        file.close()
+    except FileNotFoundError:
+        generate_question_log()
+
+def generate_question_log():
+    global question_log
+    print("generating new question log")
+
+    all_tables = 12
+    top_table = 12
+    counter = 1
+
+    for x in range(2, (top_table+1)):
+        for y in range (2, (all_tables+1)):
+            multi_sum = str(x) + "x" + str(y)+ "= "
+            multi_ans = x*y
+            question_log[counter] = [multi_sum, multi_ans, 0, 0, 0]
+            counter +=1
+        for z in range (2, (all_tables+1)):
+            div_sum =  str(x*z) + ":" + str(x) + "= "
+            div_ans = z
+            question_log[counter] = [div_sum, div_ans, 0, 0,0]
+            counter +=1
+
+    file = open('question_log', 'wb')
+    pickle.dump(question_log, file)
+    file.close()
 
 def generate_questions(total_questions):
     """
@@ -135,13 +178,13 @@ def ask_question(qs_to_ask):
 def do_the_tempo_toets():
     """
     The big toets.
-    change the quiz_time to make toets longer or shorter
+    Specify a quiz time on running script to make toets longer or shorter (default 60 seconds)
     """
     global try_agains
     global question_log
+    global quiz_time
     correct = 0
     incorrect = 0
-    quiz_time =5
     try_agains = {}
     header()
     player = input("Who's playing? ")
@@ -329,12 +372,13 @@ def main_menu(try_agains = {}):
     file.close()
     global question_list
     global tough_list
+    global quiz_time
     qlist = False
     trylist = False
     toughlist = False
     header()
     print("TOETS MODE...")
-    print("[1] - Do the TEMPO TOETS!!!")
+    print("[1] - Do the {} second TEMPO TOETS!!!".format(quiz_time))
     print("\n\n")
     print("PRACTICE MODE...")
     print("[2] - New question list")
@@ -456,4 +500,5 @@ def main_menu(try_agains = {}):
     else:
         main_menu(try_agains)
 
+set_highscore_questionlog()
 main_menu()
