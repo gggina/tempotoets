@@ -201,7 +201,7 @@ def do_the_tempo_toets():
     player = input("Who's playing? ")
     while len(player)<1:
         player = input("you need to enter a name so i can save your score...\n")
-    while len(player)>10:
+    while len(player)>12:
         player = input("try again - this time, keep it a bit shorter (max 10 chars)...\n")
     print("Good to see you", player, "- you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
@@ -326,7 +326,7 @@ def read_high_score():
                 current_rank = str(top_score+1)
                 while len(current_rank) <2:
                     current_rank = current_rank + " "
-                print("{} > ... ".format(current_rank))
+                print("{} >  ... ".format(current_rank))
     else:
         print("No high scores yet!\n")
 
@@ -379,6 +379,8 @@ def question_stats():
                     while len(tricky_question) + len(tricky_answer) < 13:
                         tricky_answer = tricky_answer + "."
                     current_tricky_rank = str(tricky_rank)
+                    while len(current_tricky_rank) < 2:
+                        current_tricky_rank = current_tricky_rank + " "
                     success_rate = str(100-fail_perc) + "%"
                     while len(success_rate) < 4:
                         success_rate = success_rate + " "
