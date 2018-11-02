@@ -75,17 +75,19 @@ def generate_questions(total_questions):
 def print_question_list(ids_guesses):
     global question_log
     for q in ids_guesses:
-        question_number = ids_guesses[q][0]
+        question_number = str(ids_guesses[q][0])
         question = question_log[q][0]
         correct_answer = str(question_log[q][1])
         player_answer = str(ids_guesses[q][-1])
+        while len(question_number) < 2:
+            question_number = question_number + " "
         while len(question) <8:
             question = question + " "
         while len(player_answer) <4:
             player_answer = player_answer + " "
-        while len(correct_answer) < 3:
+        while len(question_log[q][0]+ correct_answer) < 11:
             correct_answer = correct_answer + " "
-        print("question {0} > {1}your answer: {2} correct answer:  >> {1}{3} <<".format(question_number, question, player_answer, correct_answer))
+        print("question {0} > {1}your answer: {2} correct answer:  >> {3}{4} <<".format(question_number, question, player_answer, question_log[q][0], correct_answer))
 
 def generate_walkthrough_question_list(tafel):
     global question_log
@@ -162,7 +164,7 @@ def ask_question(qs_to_ask):
             input("hit [ENTER] to go back to the main menu")
             main_menu(try_agains)
         q +=1
-    print("\nSTOPPING THE TIMER...")
+    print("\nSTOPPING THE TIMER... ")
     end = time.time()
     total_time = round((end-start),2)
     print("Total time spent:", total_time, "seconds")
@@ -236,7 +238,7 @@ def do_the_tempo_toets():
         total_time = round((time.time()-start),2)
     print("STOP!!")
     print("time's up.")
-    print("...............")
+    print("............... ")
     print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
     print("\n\n")
     if correct > incorrect:
@@ -256,7 +258,7 @@ def do_the_tempo_toets():
 
 def high_score_check(total_correct, total_incorrect, player):
     """
-    Checks if the results of a tempo toets warrant adding to the high_scores list
+    Checks if the results of a tempotoets warrant adding to the high_scores list
     Persists an updated high_scores list to the high_scores file using pickle
     """
     global high_scores
@@ -324,7 +326,7 @@ def read_high_score():
                 current_rank = str(top_score+1)
                 while len(current_rank) <2:
                     current_rank = current_rank + " "
-                print("{} > ...".format(current_rank))
+                print("{} > ... ".format(current_rank))
     else:
         print("No high scores yet!\n")
 
@@ -337,7 +339,7 @@ def header():
     right_now = datetime.datetime.today()
     pretty_datetime = right_now.ctime()
     print("> ---------------------------- <")
-    print(">         TEMPO TOETS          <")
+    print(">         TEMPOTOETS           <")
     print(">                              <")
     print(">  ", pretty_datetime, "  <")
     print("> ---------------------------- <")
@@ -388,7 +390,7 @@ def question_stats():
         if len(fails) == len(question_log):
             print("No questions answered yet.\n")
         else:
-            print("All questions are successfully answered at least 80% of the time.\n")
+            print("All questions have been successfully answered at least 80% of the time.\n")
 
 
 def the_unaskeds():
@@ -419,105 +421,121 @@ def main_menu(try_agains = {}):
     trylist = False
     toughlist = False
     header()
-    print("TOETS MODE...")
-    print("[1] - Do the {} second TEMPO TOETS!!!".format(quiz_time))
+    print("TOETS MODE... ")
+    print("[1] - Do the {} second TEMPOTOETS!!!".format(quiz_time))
     print("\n\n")
-    print("PRACTICE MODE...")
+    print("PRACTICE MODE... ")
     print("[2] - New random question list")
     if len(question_list) > 0:
         qlist = True
-        print("[3] - Same questions again (random order)")
+        print("[3] - Play the same questions again (random order)")
     else:
-        print("[3] - ...option not available yet")
+        print("[ ] - ... not available yet")
     if len(try_agains) >0:
         trylist = True
-        print("[4] - Just the questions you got wrong last time")
+        print("[4] - Retry the questions you got wrong last time")
     else:
-        print("[4] - ...option not available yet")
+        print("[ ] - ... not available yet")
     if len(tough_list) >0:
         toughlist = True
         print("[5] - ** TRY SOME TRICKY QUESTIONS!!! **")
     else:
-        print("[5] - ...option not available yet")
+        print("[ ] - ... not available yet")
     print("[6] - Pick a table to to practice")
     print("\n")
     print("----------------")
-    print("[9] - TEMPO TOETS high scores")
+    print("[9] - TEMPOTOETS high scores")
     print("[stats] - find out the tricky questions")
+    print("[t] - change the tempotoets timer")
     print("[q] - quit this game")
     print("\n")
-    user_action = input("What do you want to do?")
+    user_action = input("What do you want to do? ")
     if user_action == "2":
-        number_of_questions = input("how many questions do you want?")
+        number_of_questions = input("how many questions do you want? ")
         try:
             number_of_questions = int(number_of_questions)
         except ValueError:
             number_of_questions = 10
             print("Not a valid input - will generate a list with 10 questions.")
-            input("Press [ENTER] to continue...")
+            input("Press [ENTER] to continue... ")
         question_list = generate_questions(number_of_questions)
         try_agains = ask_question(question_list)
-        input("Press [ENTER] to continue...")
+        input("Press [ENTER] to continue... ")
         main_menu(try_agains)
-    elif user_action == "3" and qlist == True:
-        old_qs = list(question_list.keys())
-        random.shuffle(old_qs)
-        new_question_list = {}
-        for i in range(len(old_qs)):
-            new_question = old_qs[i]
-            print(new_question)
-            new_question_list[new_question] = question_list[new_question]
-        try_agains = ask_question(new_question_list)
-        input("Press [ENTER] to continue...")
-        main_menu(try_agains)
-    elif user_action == "4" and trylist == True:
-        try_agains = ask_question(try_agains)
-        input("Press [ENTER] to continue...")
-        main_menu(try_agains)
-    elif user_action == "5" and toughlist == True:
-        if len(tough_list) > 10:
-            old_qs = list(tough_list.keys())
+    elif user_action == "3":
+        if qlist == True:
+            old_qs = list(question_list.keys())
             random.shuffle(old_qs)
-            tough_play_list = {}
-            for i in range(10):
+            new_question_list = {}
+            for i in range(len(old_qs)):
                 new_question = old_qs[i]
-                tough_play_list[new_question] = tough_list[new_question]
-            print(len(tough_play_list))
+                print(new_question)
+                new_question_list[new_question] = question_list[new_question]
+            try_agains = ask_question(new_question_list)
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
         else:
-            tough_play_list = tough_list
-        try_agains = ask_question(tough_play_list)
-        input("Press [ENTER] to continue...")
-        main_menu(try_agains)
+            print("...option not available yet, do the tempotoets or practice with a table or some random questions first")
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
+    elif user_action == "4":
+        if trylist == True:
+            try_agains = ask_question(try_agains)
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
+        else:
+            print("...option not available yet, do the tempotoets or practice with a table or some random questions first")
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
+    elif user_action == "5":
+        if toughlist == True:
+            if len(tough_list) > 10:
+                old_qs = list(tough_list.keys())
+                random.shuffle(old_qs)
+                tough_play_list = {}
+                for i in range(10):
+                    new_question = old_qs[i]
+                    tough_play_list[new_question] = tough_list[new_question]
+                print(len(tough_play_list))
+            else:
+                tough_play_list = tough_list
+            try_agains = ask_question(tough_play_list)
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
+        else:
+            print("...option not available yet, do the tempotoets or practice with some random questions first")
+            input("Press [ENTER] to continue... ")
+            main_menu(try_agains)
     elif user_action == "1":
         try_agains = do_the_tempo_toets()
-        input("Press [ENTER] to continue...")
+        input("Press [ENTER] to continue... ")
         if try_agains and len(try_agains) > 0:
             main_menu(try_agains)
         else:
             main_menu()
     elif user_action == "6":
         table_num = False
-        table_to_practice = input("which number do you want to practice?")
+        table_to_practice = input("which number do you want to practice? ")
         while table_num == False:
             try:
                 table_to_practice = int(table_to_practice)
                 if table_to_practice < 2 or table_to_practice > 12:
                     print("Not a valid input - enter a number between 2 and 12")
-                    table_to_practice = input("which number do you want to practice?")
+                    table_to_practice = input("which number do you want to practice? ")
                 else:
                     table_num = True
             except ValueError:
                 print("Not a valid input - enter a number between 2 and 12")
-                table_to_practice = input("which number do you want to practice?")
+                table_to_practice = input("which number do you want to practice? ")
         question_list = generate_walkthrough_question_list(table_to_practice)
         try_agains = ask_question(question_list)
-        input("Press [ENTER] to continue...")
+        input("Press [ENTER] to continue... ")
         main_menu(try_agains)
     elif user_action == "9":
         header()
         read_high_score()
         print("")
-        input("Press [ENTER] to go back to the menu...")
+        input("Press [ENTER] to go back to the menu... ")
         main_menu(try_agains)
     elif user_action == "clear high scores":
         action = input("Clear high scores? (y/n)")
@@ -528,20 +546,36 @@ def main_menu(try_agains = {}):
             pickle.dump(high_scores, file)
             file.close()
             print("High scores cleared - no going back.")
-            input("Press [ENTER] to go back to the menu and start again...")
+            input("Press [ENTER] to go back to the menu and start again... ")
             main_menu(try_agains)
         else:
-            input("Press [ENTER] to pretend this never happened...")
+            input("Press [ENTER] to pretend this never happened... ")
             main_menu(try_agains)
     elif user_action == "stats":
         question_stats()
         print("")
-#        input("Press [ENTER] to list questions that have not yet been asked...")
+#        input("Press [ENTER] to list questions that have not yet been asked... ")
 #        the_unaskeds()
 #        print("")
-        input("Press [ENTER] to go back to the menu...")
+        input("Press [ENTER] to go back to the menu... ")
         main_menu(try_agains)
+    elif user_action == "t":
+        new_quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
+        new_time_success = 0
+        while new_time_success == 0:
+            try:
+                new_quiz_time = int(new_quiz_time)
+                if new_quiz_time >=2 and new_quiz_time <=120:
+                    new_time_success = 1
+                    quiz_time = new_quiz_time
 
+                else:
+                    print("Not a valid input = enter a number between 2 and 120")
+                    quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
+            except ValueError:
+                print("Not a valid input = enter a number between 2 and 120")
+                quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
+        main_menu(try_agains)
     elif user_action == "q":
         print ("...goodbye")
         raise SystemExit
