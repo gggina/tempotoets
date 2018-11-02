@@ -578,7 +578,7 @@ def main_menu(try_agains = {}):
         main_menu(try_agains)
     elif user_action == "q":
         print ("...goodbye")
-        raise SystemExit
+        sys.exit(2)
     else:
         main_menu(try_agains)
 
