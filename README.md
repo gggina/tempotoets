@@ -1,6 +1,6 @@
 # tempotoets
 
-A timed times table test - for kids and the resto of us.
+A timed times table test - for kids and the rest of us.
 
 Let's make the tempotoets fun again :)
 
