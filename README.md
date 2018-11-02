@@ -1,8 +1,10 @@
 # tempotoets
-Let's make the tempotoets fun again :)
-A tempotoets is a test to see how many mental arithmetic questions you can answer in a short amount of time. It's fun and surprisingy tricky (even though the questions are straightforward). 
 
-This is a challenging commandline quiz to train your brain on times tables from 2 through to 12. Bet you can't score more than 35 on a 60 second tempotoets!
+A timed times table test - for kids ...and the rest of us.
+
+The tempotoets is a test to see how many mental arithmetic questions you can answer in a short amount of time. It's fun and surprisingy tricky (even though the questions are straightforward). 
+
+This is a challenging commandline quiz to train your brain on times tables from 2 through to 12. I bet you can't score more than 35 on a 60 second tempotoets!
 
 Hints:
 
