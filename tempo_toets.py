@@ -18,11 +18,10 @@ tough_list = {}
 question_log = {}
 high_scores= {}
 
-# high_scores = {quiz_time:{total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}}
-
 def set_highscore_questionlog ():
     global high_scores
     global question_log
+    # high_scores = {quiz_time:{total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}}
     try:
         file = open('high_scores', 'rb')
         high_scores = pickle.load(file)
@@ -424,16 +423,22 @@ def main_menu(try_agains = {}):
     print("[1] - Do the {} second TEMPO TOETS!!!".format(quiz_time))
     print("\n\n")
     print("PRACTICE MODE...")
-    print("[2] - New question list")
+    print("[2] - New random question list")
     if len(question_list) > 0:
         qlist = True
         print("[3] - Same questions again (random order)")
+    else:
+        print("[3] - ...option not available yet")
     if len(try_agains) >0:
         trylist = True
         print("[4] - Just the questions you got wrong last time")
+    else:
+        print("[4] - ...option not available yet")
     if len(tough_list) >0:
         toughlist = True
         print("[5] - ** TRY SOME TRICKY QUESTIONS!!! **")
+    else:
+        print("[5] - ...option not available yet")
     print("[6] - Pick a table to to practice")
     print("\n")
     print("----------------")
