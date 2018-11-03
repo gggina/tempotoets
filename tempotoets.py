@@ -73,7 +73,7 @@ def generate_question_log():
             counter +=1
             div_sum =  str(x*y) + ":" + str(x) + "= "
             div_ans = y
-            question_log[counter] = [div_sum, div_ans, 0, 0,0]
+            question_log[counter] = [div_sum, div_ans, 0, 0, 0]
             if x in ids_for_each_table:
                 ids_for_each_table[x].append(counter)
             else:
@@ -97,8 +97,8 @@ def generate_questions(total_questions):
     """
     global question_log
     question_list = {}
-    for q in range(1, (total_questions+1)):
-        new_q = random.randint(1,len(question_log))
+    for q in range(1, (total_questions + 1)):
+        new_q = random.randint(1, len(question_log))
         question_list[new_q] = question_log[new_q]
     return question_list
 
@@ -112,9 +112,9 @@ def print_question_list(ids_guesses):
         player_answer = str(ids_guesses[q][-1])
         while len(question_number) < 2:
             question_number = question_number + " "
-        while len(question) <8:
+        while len(question) < 8:
             question = question + " "
-        while len(player_answer) <4:
+        while len(player_answer) < 4:
             player_answer = player_answer + " "
         while len(question_log[q][0]+ correct_answer) < 11:
             correct_answer = correct_answer + " "
@@ -182,7 +182,7 @@ def ask_question(qs_to_ask):
         result = answer_question(n, q)
         while result == "invalid":
             print("you're wasting time - enter a number higher than 0")
-            result = answer_question(n,q)
+            result = answer_question(n, q)
         if result == "correct":
             correct +=1
         elif result == "incorrect":
@@ -193,7 +193,7 @@ def ask_question(qs_to_ask):
         q +=1
     print("\nSTOPPING THE TIMER... ")
     end = time.time()
-    total_time = round((end-start),2)
+    total_time = round((end-start), 2)
     print("Total time spent:", total_time, "seconds")
     print("\n")
     input("hit [ENTER] to see your results")
@@ -216,7 +216,6 @@ def ask_question(qs_to_ask):
 def do_the_tempo_toets():
     """
     The big toets.
-    Specify a quiz time on running script to make toets longer or shorter (default 60 seconds)
     """
     global try_agains
     global question_log
@@ -225,7 +224,7 @@ def do_the_tempo_toets():
     incorrect = 0
     try_agains = {}
     header()
-    valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=_+§±[{]}\|';:/?.>,<`~"
+    valid_chars = " abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=_+§±[{]}\|';:/?.>,<`~"
     valid_chars += '"'
     good_name = 0
     while good_name == 0:
@@ -241,7 +240,7 @@ def do_the_tempo_toets():
         player = input("you need to enter a name so i can save your score...\nWho's playing? ")
     while len(player) > 12:
         player = input("try again - this time, keep it a bit shorter (max 10 chars)...\nWho's playing? ")
-    print("Good to see you", player, "- you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
+    print("Good to see you {0} - you get {1} seconds...\nSee how many questions you can answer!\n".format(player, quiz_time))
     input("Hit [ENTER] to start")
     print("GO!")
     start = time.time()
@@ -258,7 +257,7 @@ def do_the_tempo_toets():
         while result == "invalid":
             if invalid_answers < 3:
                 print("you're wasting time - enter a number higher than 0")
-                invalid_answers +=1
+                invalid_answers += 1
                 result = answer_question(question_id, q)
             else:
                 print("too much time wasting! Goodbye")
@@ -272,12 +271,12 @@ def do_the_tempo_toets():
         else:
             input("hit [ENTER] to go back to the main menu")
             main_menu()
-        q +=1
-        total_time = round((time.time()-start),2)
+        q += 1
+        total_time = round((time.time()-start), 2)
     print("STOP!!")
     print("time's up.")
     print("............... ")
-    print("You answered >>", (correct + incorrect), "<< questions in", total_time, "seconds")
+    print("You answered >> {0} << questions in {1} seconds".format((correct + incorrect), total_time))
     print("\n\n")
     if correct > incorrect:
         high_score_check(correct, incorrect, player)
@@ -345,29 +344,29 @@ def read_high_score():
                 for s_r in success_ratio_keys:
                     top_scoring_names = []
                     current_rank = str(rank)
-                    if len(current_rank) <2:
+                    if len(current_rank) < 2:
                         current_rank = " " + current_rank
                     current_success_ratio = "(" + str(s_r) + "%)"
-                    while len(current_success_ratio) <6:
+                    while len(current_success_ratio) < 6:
                         current_success_ratio = current_success_ratio + " "
                     for name in current_high_scores[answered_correctly][s_r]:
                         top_scoring_names.append(name)
                     top_scoring_names = top_scoring_names[::-1]
-                    name_num=1
+                    name_num = 1
                     high_scorer_names = ""
                     for tsn in top_scoring_names:
                         if name_num <= 4:
-                            high_scorer_names = high_scorer_names+" ["+  tsn + "]"
-                            name_num +=1
+                            high_scorer_names = high_scorer_names + " ["+  tsn + "]"
+                            name_num += 1
                     print("{0} >  {1} correct {2} -{3}".format(current_rank, answered_correctly_string, current_success_ratio, high_scorer_names))
-                    rank +=1
+                    rank += 1
             except IndexError:
                 current_rank = str(rank)
-                if len(current_rank) <2:
+                if len(current_rank) < 2:
                     current_rank = " " + current_rank
                 if rank <= 10:
                     print("{} >  ... ".format(current_rank))
-                    rank +=1
+                    rank += 1
     else:
         print("No high scores yet!\n")
 
@@ -378,11 +377,10 @@ def header():
     """
     os.system('cls||clear')
     right_now = datetime.datetime.today()
-    pretty_datetime = right_now.ctime()
     print("> ---------------------------- <")
     print(">         TEMPOTOETS           <")
     print(">                              <")
-    print(">  ", pretty_datetime, "  <")
+    print(">   {}   <".format(right_now.ctime()))
     print("> ---------------------------- <\n")
 
 
@@ -408,7 +406,7 @@ def question_stats():
                 if fail_ratio not in fails:
                     fails.append(fail_ratio)
     fails = sorted(fails, reverse=True)
-    #paging info - number of pages of 1o items required
+    #paging info - number of pages of 10 items required
     total_pages = 1
     if len(tricky_ones) > 10:
         total_pages = int(len(tricky_ones)/10)
@@ -420,7 +418,7 @@ def question_stats():
         page_number = 1
         counter = 1
         print("Questions with fail rate of 20% or more:\n")
-        print("[ Page {0} of {1} ]\n".format(page_number,total_pages))
+        print("[ Page {0} of {1} ]\n".format(page_number, total_pages))
         for fail_perc in fails:
             for tricky_q in tricky_ones:
                 if tricky_ones[tricky_q][0] == fail_perc:
@@ -446,7 +444,7 @@ def question_stats():
                         input("\nPress [ENTER] for next page... ")
                         header()
                         print("Questions with fail rate of 20% or more:\n")
-                        print("[ Page {0} of {1} ]\n".format(page_number,total_pages))
+                        print("[ Page {0} of {1} ]\n".format(page_number, total_pages))
 
     else:
         if len(fails) == len(question_log):
@@ -465,7 +463,7 @@ def the_unaskeds():
     if len(unaskeds) > 0:
         print("Questions with 0 asks:\n")
         for q_id in unaskeds:
-            print(">", question_log[q_id][0] + str(question_log[q_id][1]))
+            print("> {0}{1}",format(question_log[q_id][0], question_log[q_id][1]))
     else:
         print("All questions have been asked at least once.")
 
@@ -496,12 +494,12 @@ def main_menu():
         print(" [3] - Play the same questions again (random order)")
     else:
         print(" [ ] - ... not available yet")
-    if len(try_agains) >0:
+    if len(try_agains) > 0:
         trylist = 1
         print(" [4] - Retry the questions you got wrong last time")
     else:
         print(" [ ] - ... not available yet")
-    if len(tough_list) >0:
+    if len(tough_list) > 0:
         toughlist = 1
         print(" [5] - ** TRY SOME TRICKY QUESTIONS!!! **")
     else:
