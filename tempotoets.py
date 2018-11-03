@@ -403,7 +403,7 @@ def question_stats():
     #paging info - number of pages of 1o items required
     total_pages = 1
     if len(tricky_ones) > 10:
-        total_pages = round((len(tricky_ones)+1)/10)
+        total_pages = int(len(tricky_ones)/10)
         if (len(tricky_ones)+1)%10 > 0:
             total_pages +=1
 
@@ -412,7 +412,7 @@ def question_stats():
         page_number = 1
         counter = 1
         print("Questions with fail rate of 20% or more:\n")
-        print("Page {0} of {1} \n".format(page_number,total_pages))
+        print("[ Page {0} of {1} ]\n".format(page_number,total_pages))
         for fail_perc in fails:
             for tricky_q in tricky_ones:
                 if tricky_ones[tricky_q][0] == fail_perc:
@@ -438,7 +438,7 @@ def question_stats():
                         input("\nPress [ENTER] for next page... ")
                         header()
                         print("Questions with fail rate of 20% or more:\n")
-                        print("Page {0} of {1}\n".format(page_number,total_pages))
+                        print("[ Page {0} of {1} ]\n".format(page_number,total_pages))
 
     else:
         if len(fails) == len(question_log):
@@ -579,7 +579,7 @@ def main_menu():
             pickle.dump(high_scores, file)
             file.close()
             print("High scores cleared - no going back.")
-    elif user_action == "stats":
+    elif user_action == "stats" or user_action == "s":
         question_stats()
 #        print("")
 #        input("Press [ENTER] to list questions that have not yet been asked... ")
