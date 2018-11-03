@@ -23,6 +23,7 @@ ids_for_each_table = {}
 def set_highscore_questionlog ():
     global high_scores
     global question_log
+    global ids_for_each_table
     # high_scores = {quiz_time:{total_correct: [{success_percentage_1: [player_1, player_2...]}, {success_percentage_2: [player_3, player_4...]}]}}
     try:
         file = open('high_scores', 'rb')
@@ -35,6 +36,14 @@ def set_highscore_questionlog ():
     try:
         file = open('question_log', 'rb')
         question_log = pickle.load(file)
+        file.close()
+    except FileNotFoundError:
+        generate_question_log()
+
+    #ids_for_each_table = {table:[q_id, q_id, ...]}
+    try:
+        file = open('ids_for_each_table', 'rb')
+        ids_for_each_table = pickle.load(file)
         file.close()
     except FileNotFoundError:
         generate_question_log()
@@ -71,8 +80,15 @@ def generate_question_log():
                 ids_for_each_table[x] = [counter]
             counter +=1
 
+    for table in ids_for_each_table:
+        ids_for_each_table[table]= sorted(ids_for_each_table[table])
+        print(ids_for_each_table[table])
+
     file = open('question_log', 'wb')
     pickle.dump(question_log, file)
+    file.close()
+    file = open('ids_for_each_table', 'wb')
+    pickle.dump(ids_for_each_table, file)
     file.close()
 
 
@@ -373,6 +389,7 @@ def question_stats():
     header()
     global question_log
     global tough_list
+
     tough_list = {}
     tricky_ones = {}
     fails = []
@@ -384,9 +401,19 @@ def question_stats():
                 if fail_ratio not in fails:
                     fails.append(fail_ratio)
     fails = sorted(fails, reverse=True)
+    #paging info - number of pages of 1o items required
+    total_pages = 1
+    if len(tricky_ones) > 10:
+        total_pages = round((len(tricky_ones)+1)/10)
+        if (len(tricky_ones)+1)%10 > 0:
+            total_pages +=1
+
     if len(fails) > 0:
-        print("Questions with fail rate of 20% or more:\n")
         tricky_rank = 1
+        page_number = 1
+        counter = 1
+        print("Questions with fail rate of 20% or more:\n")
+        print("Page {0} of {1} \n".format(page_number,total_pages))
         for fail_perc in fails:
             for tricky_q in tricky_ones:
                 if tricky_ones[tricky_q][0] == fail_perc:
@@ -405,6 +432,15 @@ def question_stats():
                     print("{0} >  {1}{2} {3} correct ({4} attempts)".format(current_tricky_rank,tricky_question,tricky_answer, success_rate, total_attempts))
                     tough_list[tricky_q_id] = question_log[tricky_q_id]
                     tricky_rank +=1
+                    counter += 1
+                    if counter == 11:
+                        counter = 1
+                        page_number += 1
+                        input("\nPress [ENTER] for next page... ")
+                        header()
+                        print("Questions with fail rate of 20% or more:\n")
+                        print("Page {0} of {1}\n".format(page_number,total_pages))
+
     else:
         if len(fails) == len(question_log):
             print("No questions answered yet.\n")
@@ -515,19 +551,20 @@ def main_menu():
     elif user_action == "1":
         try_agains = do_the_tempo_toets()
     elif user_action == "6":
-        table_num = False
+        table_num = 0
         table_to_practice = input("which number do you want to practice? ")
-        while table_num == False:
+        while table_num == 0:
             try:
                 table_to_practice = int(table_to_practice)
                 if table_to_practice < 2 or table_to_practice > 12:
                     print("Not a valid input - enter a number between 2 and 12")
                     table_to_practice = input("which number do you want to practice? ")
                 else:
-                    table_num = True
+                    table_num = 1
             except ValueError:
                 print("Not a valid input - enter a number between 2 and 12")
                 table_to_practice = input("which number do you want to practice? ")
+        print(table_num, table_to_practice)
         question_list = generate_walkthrough_question_list(table_to_practice)
         try_agains = ask_question(question_list)
     elif user_action == "9" or user_action == "h":
