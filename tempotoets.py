@@ -82,7 +82,6 @@ def generate_question_log():
 
     for table in ids_for_each_table:
         ids_for_each_table[table]= sorted(ids_for_each_table[table])
-        print(ids_for_each_table[table])
 
     file = open('question_log', 'wb')
     pickle.dump(question_log, file)
