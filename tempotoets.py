@@ -17,6 +17,8 @@ question_list = {}
 tough_list = {}
 question_log = {}
 high_scores= {}
+ids_for_each_table = {}
+
 
 def set_highscore_questionlog ():
     global high_scores
@@ -37,12 +39,17 @@ def set_highscore_questionlog ():
     except FileNotFoundError:
         generate_question_log()
 
+
 def generate_question_log():
     global question_log
+    global ids_for_each_table
     print("generating new question log")
 
+    #change the below values to generate a larger/smaller question log
     all_tables = 12
     top_table = 12
+
+    #counter is used to generate a unique ID for each question in the question log (the dictionary key)
     counter = 1
 
     for x in range(2, (top_table+1)):
@@ -50,16 +57,24 @@ def generate_question_log():
             multi_sum = str(x) + "x" + str(y)+ "= "
             multi_ans = x*y
             question_log[counter] = [multi_sum, multi_ans, 0, 0, 0]
+            if y in ids_for_each_table:
+                ids_for_each_table[y].append(counter)
+            else:
+                ids_for_each_table[y] = [counter]
             counter +=1
-        for z in range (2, (all_tables+1)):
-            div_sum =  str(x*z) + ":" + str(x) + "= "
-            div_ans = z
+            div_sum =  str(x*y) + ":" + str(x) + "= "
+            div_ans = y
             question_log[counter] = [div_sum, div_ans, 0, 0,0]
+            if x in ids_for_each_table:
+                ids_for_each_table[x].append(counter)
+            else:
+                ids_for_each_table[x] = [counter]
             counter +=1
 
     file = open('question_log', 'wb')
     pickle.dump(question_log, file)
     file.close()
+
 
 def generate_questions(total_questions):
     """
@@ -71,6 +86,7 @@ def generate_questions(total_questions):
         new_q = random.randint(1,len(question_log))
         question_list[new_q] = question_log[new_q]
     return question_list
+
 
 def print_question_list(ids_guesses):
     global question_log
@@ -89,24 +105,15 @@ def print_question_list(ids_guesses):
             correct_answer = correct_answer + " "
         print("question {0} > {1}your answer: {2} correct answer:  >> {3}{4} <<".format(question_number, question, player_answer, question_log[q][0], correct_answer))
 
+
 def generate_walkthrough_question_list(tafel):
     global question_log
-    walkthrough_question_lists = {}
+    global ids_for_each_table
     new_question_list = {}
-    walkthrough_question_lists[2] = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,45,67,89,111,133,155,177,199,221]
-    walkthrough_question_lists[3] = [23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,2,46,68,90,112,134,156,178,200,222]
-    walkthrough_question_lists[4] = [45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,3,25,69,91,113,135,157,179,201,223]
-    walkthrough_question_lists[5] = [67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,4,26,48,92,114,136,158,180,202,224]
-    walkthrough_question_lists[6] = [89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,104,105,106,107,108,109,110,5,27,49,71,115,137,159,181,203,225]
-    walkthrough_question_lists[7] = [111,112,113,114,115,116,117,118,119,120,121,122,123,124,125,126,127,128,129,130,131,132,6,28,50,72,94,138,160,182,204,226]
-    walkthrough_question_lists[8] = [133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,7,29,51,73,95,117,161,183,205,227]
-    walkthrough_question_lists[9] = [155,156,157,158,159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,8,30,52,74,96,118,140,184,206,228]
-    walkthrough_question_lists[10] = [177,178,179,180,181,182,183,184,185,186,187,188,190,191,192,193,194,195,196,197,198,9,31,53,75,97,119,141,163,207,229]
-    walkthrough_question_lists[11] = [199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,220,10,32,54,76,98,120,142,164,230]
-    walkthrough_question_lists[12] = [221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,11,33,55,77,99,121,143,165]
-    for q_id in walkthrough_question_lists[tafel]:
+    for q_id in ids_for_each_table[tafel]:
         new_question_list[q_id] = question_log[q_id]
     return new_question_list
+
 
 def answer_question(question_id, q):
     """
@@ -137,6 +144,7 @@ def answer_question(question_id, q):
     except ValueError:
         result = "invalid"
         return result
+
 
 def ask_question(qs_to_ask):
     """
@@ -185,6 +193,7 @@ def ask_question(qs_to_ask):
         print_question_list(try_agains)
         print("-- -- -- -- -- --\n")
     return try_agains
+
 
 def do_the_tempo_toets():
     """
@@ -256,6 +265,7 @@ def do_the_tempo_toets():
         print("ALL CORRECT!!!")
         print("-- -- -- -- -- --\n")
 
+
 def high_score_check(total_correct, total_incorrect, player):
     """
     Checks if the results of a tempotoets warrant adding to the high_scores list
@@ -279,6 +289,7 @@ def high_score_check(total_correct, total_incorrect, player):
     file = open('high_scores', 'wb')
     pickle.dump(high_scores, file)
     file.close()
+
 
 def read_high_score():
     """
@@ -332,6 +343,7 @@ def read_high_score():
     else:
         print("No high scores yet!\n")
 
+
 def header():
     """
     Printed at the top of every screen
@@ -347,6 +359,7 @@ def header():
     print("> ---------------------------- <")
     print("\n")
     return pretty_datetime
+
 
 def question_stats():
     """
@@ -410,6 +423,7 @@ def the_unaskeds():
             print(">", question_log[q_id][0] + str(question_log[q_id][1]))
     else:
         print("All questions have been asked at least once.")
+
 
 def main_menu(try_agains = {}):
     """
@@ -500,7 +514,6 @@ def main_menu(try_agains = {}):
                 for i in range(10):
                     new_question = old_qs[i]
                     tough_play_list[new_question] = tough_list[new_question]
-#                print(len(tough_play_list))
             else:
                 tough_play_list = tough_list
             question_list = tough_play_list
