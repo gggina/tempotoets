@@ -136,6 +136,8 @@ def answer_question(question_id, q):
     used by all quiz options
     """
     global question_log
+    global try_agains
+
     question_log[question_id][4] +=1
     question = question_log[question_id][0]
     if len(str(q)) == 1:
@@ -144,10 +146,9 @@ def answer_question(question_id, q):
     if answer == "m":
         result = "menu"
         return result
-    global try_agains
     try:
         answer = int(answer)
-        if answer == 0:
+        if answer <= 0 :
             result = "invalid"
             return result
         elif answer == question_log[question_id][1]:
@@ -170,6 +171,7 @@ def ask_question(qs_to_ask):
     global try_agains
     header()
     print("[m] - Back to the main menu\n")
+    input("Hit [ENTER] to start\n")
     print("STARTING THE TIMER...\n")
     start = time.time()
     correct = 0
@@ -187,7 +189,6 @@ def ask_question(qs_to_ask):
             incorrect +=1
         else:
             input("hit [ENTER] to go back to the main menu")
-#            main_menu(try_agains)
             main_menu()
         q +=1
     print("\nSTOPPING THE TIMER... ")
@@ -195,22 +196,21 @@ def ask_question(qs_to_ask):
     total_time = round((end-start),2)
     print("Total time spent:", total_time, "seconds")
     print("\n")
-    input("Hit [ENTER] to see your results")
+    input("hit [ENTER] to see your results")
+    print("\nCORRECT answers: {}".format(correct))
+    print("INCORRECT answers: {}".format(incorrect))
     if incorrect == 0:
         print("\n-- -- -- -- -- --")
         print("ALL CORRECT!!!")
         print("-- -- -- -- -- --\n")
     elif correct == 0:
-        print("\n-- -- -- -- -- --")
-        print("0 correct answers...\n")
+        print("-- -- -- -- -- --")
         print_question_list(try_agains)
         print("-- -- -- -- -- --\n")
     else:
-        print("\n-- -- -- -- -- --")
-        print("You answered {} question(s) incorrectly:\n".format(len(try_agains)))
+        print("-- -- -- -- -- --")
         print_question_list(try_agains)
         print("-- -- -- -- -- --\n")
-    return try_agains
 
 
 def do_the_tempo_toets():
@@ -226,7 +226,7 @@ def do_the_tempo_toets():
     try_agains = {}
     header()
     valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=_+§±[{]}\|';:/?.>,<`~"
-    valid_chars = valid_chars + '"'
+    valid_chars += '"'
     good_name = 0
     while good_name == 0:
         player = input("Who's playing? ")
@@ -237,9 +237,9 @@ def do_the_tempo_toets():
                 good_name = 0
                 print("try again - make sure you're only using basic characters...")
                 break
-    while len(player)<1:
+    while len(player) < 1:
         player = input("you need to enter a name so i can save your score...\nWho's playing? ")
-    while len(player)>12:
+    while len(player) > 12:
         player = input("try again - this time, keep it a bit shorter (max 10 chars)...\nWho's playing? ")
     print("Good to see you", player, "- you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
@@ -256,7 +256,7 @@ def do_the_tempo_toets():
         this_quiz.append(question_id)
         result = answer_question(question_id, q)
         while result == "invalid":
-            if invalid_answers <3:
+            if invalid_answers < 3:
                 print("you're wasting time - enter a number higher than 0")
                 invalid_answers +=1
                 result = answer_question(question_id, q)
@@ -271,7 +271,6 @@ def do_the_tempo_toets():
             question_log[question_id][3] += 1
         else:
             input("hit [ENTER] to go back to the main menu")
-#            main_menu(try_agains)
             main_menu()
         q +=1
         total_time = round((time.time()-start),2)
@@ -283,13 +282,12 @@ def do_the_tempo_toets():
     if correct > incorrect:
         high_score_check(correct, incorrect, player)
     input("hit [ENTER] to see your results")
-    print("\nCORRECT answers:", correct)
-    print("INCORRECT answers: ", incorrect)
+    print("\nCORRECT answers: {}".format(correct))
+    print("INCORRECT answers: {}".format(incorrect))
     if incorrect > 0:
         print("-- -- -- -- -- --")
         print_question_list(try_agains)
         print("-- -- -- -- -- --")
-        return try_agains
     else:
         print("\n-- -- -- -- -- --")
         print("ALL CORRECT!!!")
@@ -364,12 +362,12 @@ def read_high_score():
                     print("{0} >  {1} correct {2} -{3}".format(current_rank, answered_correctly_string, current_success_ratio, high_scorer_names))
                     rank +=1
             except IndexError:
-                current_rank = str(top_score+1)
+                current_rank = str(rank)
                 if len(current_rank) <2:
                     current_rank = " " + current_rank
-                while len(current_rank) <2:
-                    current_rank = current_rank + " "
-                print("{} >  ... ".format(current_rank))
+                if rank <= 10:
+                    print("{} >  ... ".format(current_rank))
+                    rank +=1
     else:
         print("No high scores yet!\n")
 
@@ -377,7 +375,6 @@ def read_high_score():
 def header():
     """
     Printed at the top of every screen
-    returns a nicely formatted datetime that could be used for storing data
     """
     os.system('cls||clear')
     right_now = datetime.datetime.today()
@@ -386,9 +383,7 @@ def header():
     print(">         TEMPOTOETS           <")
     print(">                              <")
     print(">  ", pretty_datetime, "  <")
-    print("> ---------------------------- <")
-    print("\n")
-    return pretty_datetime
+    print("> ---------------------------- <\n")
 
 
 def question_stats():
@@ -491,32 +486,32 @@ def main_menu():
     toughlist = 0
     header()
     print("TOETS MODE... ")
-    print("[1] - Do the {} second TEMPOTOETS!!!".format(quiz_time))
-    print("\n\n")
+    print(" [1] - Do the {} second TEMPOTOETS!!!".format(quiz_time))
+    print(" [h] - High score table")
+    print("")
     print("PRACTICE MODE... ")
-    print("[2] - New set of random questions")
+    print(" [2] - New set of random questions")
     if len(question_list) > 0:
         qlist = 1
-        print("[3] - Play the same questions again (random order)")
+        print(" [3] - Play the same questions again (random order)")
     else:
-        print("[ ] - ... not available yet")
+        print(" [ ] - ... not available yet")
     if len(try_agains) >0:
         trylist = 1
-        print("[4] - Retry the questions you got wrong last time")
+        print(" [4] - Retry the questions you got wrong last time")
     else:
-        print("[ ] - ... not available yet")
+        print(" [ ] - ... not available yet")
     if len(tough_list) >0:
         toughlist = 1
-        print("[5] - ** TRY SOME TRICKY QUESTIONS!!! **")
+        print(" [5] - ** TRY SOME TRICKY QUESTIONS!!! **")
     else:
-        print("[ ] - ... not available yet")
-    print("[6] - Pick a table to to practice")
-    print("\n")
+        print(" [ ] - ... not available yet")
+    print(" [6] - Pick a table to to practice")
+    print("")
     print("----------------")
-    print("[h] - TEMPOTOETS high scores")
-    print("[stats] - find out the tricky questions")
-    print("[t] - change the tempotoets timer")
-    print("[q] - quit this game")
+    print(" [s] - check your game statistics (find out the tricky questions)")
+    print(" [t] - change the tempotoets timer")
+    print(" [q] - quit this game")
     print("\n")
     user_action = input("What do you want to do? ")
     if user_action == "2":
@@ -528,7 +523,7 @@ def main_menu():
             print("Not a valid input - will generate a list with 10 questions.")
             input("Press [ENTER] to continue... ")
         question_list = generate_questions(number_of_questions)
-        try_agains = ask_question(question_list)
+        ask_question(question_list)
     elif user_action == "3":
         if qlist == 1:
             old_qs = list(question_list.keys())
@@ -537,12 +532,12 @@ def main_menu():
             for i in range(len(old_qs)):
                 new_question = old_qs[i]
                 new_question_list[new_question] = question_list[new_question]
-            try_agains = ask_question(new_question_list)
+            ask_question(new_question_list)
         else:
             print("...option not available yet, do the tempotoets or practice with a table or some random questions first")
     elif user_action == "4":
         if trylist == 1:
-            try_agains = ask_question(try_agains)
+            ask_question(try_agains)
         else:
             print("...option not available yet, do the tempotoets or practice with a table or some random questions first")
     elif user_action == "5":
@@ -557,12 +552,12 @@ def main_menu():
             else:
                 tough_play_list = tough_list
             question_list = tough_play_list
-            try_agains = ask_question(tough_play_list)
+            ask_question(tough_play_list)
         else:
             print("...option not available yet, do the tempotoets or practice with some random questions first")
     elif user_action == "1":
-        try_agains = do_the_tempo_toets()
-    elif user_action == "6":
+        do_the_tempo_toets()
+    elif user_action == "6" or user_action == "p":
         table_num = 0
         table_to_practice = input("which number do you want to practice? ")
         while table_num == 0:
@@ -576,18 +571,17 @@ def main_menu():
             except ValueError:
                 print("Not a valid input - enter a number between 2 and 12")
                 table_to_practice = input("which number do you want to practice? ")
-        print(table_num, table_to_practice)
         question_list = generate_walkthrough_question_list(table_to_practice)
-        try_agains = ask_question(question_list)
+        ask_question(question_list)
     elif user_action == "9" or user_action == "h":
         header()
         read_high_score()
         print("")
     elif user_action == "clear high scores":
-        action = input("Clear high scores? (y/n)")
+        action = input("Clear high scores for the {} second tempotoets? (y/n)".format(quiz_time))
         if action == "y":
             global high_scores
-            high_scores = {}
+            high_scores[quiz_time] = {}
             file = open('high_scores', 'wb')
             pickle.dump(high_scores, file)
             file.close()
