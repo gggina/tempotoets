@@ -306,8 +306,8 @@ def read_high_score():
                 for s_r in success_ratio_keys:
                     top_scoring_names = []
                     current_rank = str(rank)
-                    while len(current_rank) <2:
-                        current_rank = current_rank + " "
+                    if len(current_rank) <2:
+                        current_rank = " " + current_rank
                     current_success_ratio = "(" + str(s_r) + "%)"
                     while len(current_success_ratio) <6:
                         current_success_ratio = current_success_ratio + " "
@@ -324,6 +324,8 @@ def read_high_score():
                     rank +=1
             except IndexError:
                 current_rank = str(top_score+1)
+                if len(current_rank) <2:
+                    current_rank = " " + current_rank
                 while len(current_rank) <2:
                     current_rank = current_rank + " "
                 print("{} >  ... ".format(current_rank))
@@ -379,13 +381,13 @@ def question_stats():
                     while len(tricky_question) + len(tricky_answer) < 13:
                         tricky_answer = tricky_answer + "."
                     current_tricky_rank = str(tricky_rank)
-                    while len(current_tricky_rank) < 2:
-                        current_tricky_rank = current_tricky_rank + " "
+                    if len(current_tricky_rank) < 2:
+                        current_tricky_rank = " " + current_tricky_rank
                     success_rate = str(100-fail_perc) + "%"
-                    while len(success_rate) < 4:
-                        success_rate = success_rate + " "
+                    for n in range (4-len(success_rate)):
+                        tricky_answer = tricky_answer + "."
                     total_attempts = str(question_log[tricky_q_id][4])
-                    print("{0}> {1}{2} {3} correct ({4} attempts)".format(current_tricky_rank,tricky_question,tricky_answer, success_rate, total_attempts))
+                    print("{0} >  {1}{2} {3} correct ({4} attempts)".format(current_tricky_rank,tricky_question,tricky_answer, success_rate, total_attempts))
                     tough_list[tricky_q_id] = question_log[tricky_q_id]
                     tricky_rank +=1
     else:
@@ -427,7 +429,7 @@ def main_menu(try_agains = {}):
     print("[1] - Do the {} second TEMPOTOETS!!!".format(quiz_time))
     print("\n\n")
     print("PRACTICE MODE... ")
-    print("[2] - New random question list")
+    print("[2] - New set of random questions")
     if len(question_list) > 0:
         qlist = True
         print("[3] - Play the same questions again (random order)")
@@ -446,7 +448,7 @@ def main_menu(try_agains = {}):
     print("[6] - Pick a table to to practice")
     print("\n")
     print("----------------")
-    print("[9] - TEMPOTOETS high scores")
+    print("[h] - TEMPOTOETS high scores")
     print("[stats] - find out the tricky questions")
     print("[t] - change the tempotoets timer")
     print("[q] - quit this game")
@@ -498,9 +500,10 @@ def main_menu(try_agains = {}):
                 for i in range(10):
                     new_question = old_qs[i]
                     tough_play_list[new_question] = tough_list[new_question]
-                print(len(tough_play_list))
+#                print(len(tough_play_list))
             else:
                 tough_play_list = tough_list
+            question_list = tough_play_list
             try_agains = ask_question(tough_play_list)
             input("Press [ENTER] to continue... ")
             main_menu(try_agains)
@@ -533,7 +536,7 @@ def main_menu(try_agains = {}):
         try_agains = ask_question(question_list)
         input("Press [ENTER] to continue... ")
         main_menu(try_agains)
-    elif user_action == "9":
+    elif user_action == "9" or user_action == "h":
         header()
         read_high_score()
         print("")
@@ -567,16 +570,15 @@ def main_menu(try_agains = {}):
         while new_time_success == 0:
             try:
                 new_quiz_time = int(new_quiz_time)
+                print("made int")
                 if new_quiz_time >=2 and new_quiz_time <=120:
-                    new_time_success = 1
+                    new_time_success += 1
                     quiz_time = new_quiz_time
-
                 else:
-                    print("Not a valid input = enter a number between 2 and 120")
-                    quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
+                    new_quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
             except ValueError:
                 print("Not a valid input = enter a number between 2 and 120")
-                quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
+                new_quiz_time = input("Set the tempotoets timer to how many seconds (current {})? ".format(quiz_time))
         main_menu(try_agains)
     elif user_action == "q":
         print ("...goodbye")
