@@ -138,6 +138,8 @@ def answer_question(question_id, q):
     global question_log
     question_log[question_id][4] +=1
     question = question_log[question_id][0]
+    if len(str(q)) == 1:
+        q = str(q) + " "
     answer = input("question {0} > {1}".format(q, question))
     if answer == "m":
         result = "menu"
@@ -223,11 +225,22 @@ def do_the_tempo_toets():
     incorrect = 0
     try_agains = {}
     header()
-    player = input("Who's playing? ")
+    valid_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()-=_+§±[{]}\|';:/?.>,<`~"
+    valid_chars = valid_chars + '"'
+    good_name = 0
+    while good_name == 0:
+        player = input("Who's playing? ")
+        for l in player:
+            if l in valid_chars:
+                good_name = 1
+            else:
+                good_name = 0
+                print("try again - make sure you're only using basic characters...")
+                break
     while len(player)<1:
-        player = input("you need to enter a name so i can save your score...\n")
+        player = input("you need to enter a name so i can save your score...\nWho's playing? ")
     while len(player)>12:
-        player = input("try again - this time, keep it a bit shorter (max 10 chars)...\n")
+        player = input("try again - this time, keep it a bit shorter (max 10 chars)...\nWho's playing? ")
     print("Good to see you", player, "- you get", quiz_time, "seconds...\nSee how many questions you can answer!\n")
     input("Hit [ENTER] to start")
     print("GO!")
