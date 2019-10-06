@@ -11,7 +11,7 @@ Hints:
 - ** requires python 3 and pickle **
 - You can clear your high score list from the main menu by typing "clear high scores"
 - Running "stats" ('s') from the main menu will generate a list of the trickiest questions to test your wits against
-- You can change the length of the quiz (default 60 seconds) by specifying a number of seconrds when calling the script. For example, to run a tempotoets of 10 seconds, use: python tempo_toets.py 10  ... now also possible from the main menu by seletcing option 't'.
+- You can change the length of the quiz (default 60 seconds) by specifying a number of seconrds when calling the script. For example, to run a tempotoets of 10 seconds, use: python tempo_toets.py 10  ... now also possible from the main menu by selecting option 't'.
 - Each tempotoets length has its own high score list
 - The more you practice, the quicker you get...
 - Enjoy :)
